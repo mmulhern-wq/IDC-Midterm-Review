@@ -1,0 +1,1404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Measuring a Country</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: navy masthead with a progress rule, scrollable "stations" tab strip, one readable column per station
+   with explainer prose, then "Try it" instruments and "Check yourself" practice. Floating study buddy chat. */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --surface-2:#e8edf2; --ink:#14213d; --muted:#53607a; --line:#d3dbe4;
+  --mast:#14213d; --mast-ink:#f2f4f6;
+  --accent:#0b6e6e; --accent-soft:#d6ecea; --accent-ink:#ffffff;
+  --gold:#d79a00; --gold-soft:#fbefd0;
+  --good:#1d7a3e; --good-soft:#dcf0e2; --bad:#b3261e; --bad-soft:#f8dcd9;
+  --c1:#0b6e6e; --c2:#d79a00; --c3:#7d4fb3; --c4:#c2410c;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1626; --surface:#172036; --surface-2:#1e2a44; --ink:#e7ecf3; --muted:#a3afc4; --line:#2c3a57;
+  --mast:#0a1020; --mast-ink:#e7ecf3;
+  --accent:#4fc1bd; --accent-soft:#16393f; --accent-ink:#0b1424;
+  --gold:#f0b93a; --gold-soft:#3a2f12;
+  --good:#5fd08a; --good-soft:#15361f; --bad:#ff8a80; --bad-soft:#3d1a18;
+  --c1:#4fc1bd; --c2:#f0b93a; --c3:#b99af0; --c4:#fb8a4f;
+  color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0f1626; --surface:#172036; --surface-2:#1e2a44; --ink:#e7ecf3; --muted:#a3afc4; --line:#2c3a57;
+  --mast:#0a1020; --mast-ink:#e7ecf3;
+  --accent:#4fc1bd; --accent-soft:#16393f; --accent-ink:#0b1424;
+  --gold:#f0b93a; --gold-soft:#3a2f12;
+  --good:#5fd08a; --good-soft:#15361f; --bad:#ff8a80; --bad-soft:#3d1a18;
+  --c1:#4fc1bd; --c2:#f0b93a; --c3:#b99af0; --c4:#fb8a4f;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:120px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--mast)}
+.gutter{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:880px;margin:0 auto}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4.5vw,40px);font-weight:800;letter-spacing:-.01em}
+h3{font-size:22px;font-weight:700}
+h4{font-size:18px;font-weight:700}
+p{margin:0}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+a{color:var(--accent)}
+
+/* Masthead */
+.mast{background:var(--mast);color:var(--mast-ink)}
+.mast .wrap{padding-block:28px 22px;display:flex;flex-wrap:wrap;gap:18px 32px;align-items:flex-end;justify-content:space-between}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.mast h1{font-size:clamp(34px,6vw,56px);font-weight:800;letter-spacing:-.02em;margin-top:6px}
+.mast h1 span{color:var(--gold)}
+.mast .lede{max-width:52ch;opacity:.85;margin-top:8px;font-size:16px}
+.meter{min-width:220px;flex:0 1 280px}
+.meter .row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;opacity:.9}
+.meter .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}
+.meter .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .5s}
+
+/* Tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:thin}
+.tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:7px 14px 7px 8px;cursor:pointer;font-size:15px;white-space:nowrap}
+.tab .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:12px;background:var(--surface-2);color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab[aria-selected="true"] .n{background:rgba(255,255,255,.25);color:inherit}
+.tab.done .n{background:var(--good);color:#fff}
+.tab.done .n::after{content:"✓"}
+.tab.done .n b{display:none}
+
+main{padding-block:32px 120px}
+section.station{display:none}
+section.station.on{display:block;animation:rise .35s ease}
+@keyframes rise{from{transform:translateY(6px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){section.station.on{animation:none}.meter .bar i{transition:none}}
+.stack{display:flex;flex-direction:column;gap:22px}
+.intro{display:flex;flex-direction:column;gap:12px}
+.intro .eyebrow{color:var(--accent);opacity:1}
+.time{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:68ch}
+.goals{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px}
+.goals h4{font-size:14px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.term{font-weight:700;color:var(--accent)}
+.quote{border-left:4px solid var(--gold);padding:6px 0 6px 16px;font-style:italic;color:var(--muted)}
+.quote cite{display:block;font-style:normal;font-size:14px;margin-top:4px}
+
+/* Defs grid */
+.defs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.def{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.def b{font-family:var(--display);font-size:18px}
+.def small{color:var(--muted);font-size:15px;line-height:1.5}
+
+/* Panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+.panel .hint{color:var(--muted);font-size:15px}
+.ctrl{display:flex;flex-direction:column;gap:6px}
+.ctrl label{font-size:15px;display:flex;justify-content:space-between;gap:8px}
+.ctrl label .num{color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select,input[type=number],input[type=text],textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+textarea{width:100%;min-height:110px;resize:vertical;line-height:1.5}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.btn{border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink);padding:9px 16px;cursor:pointer;font-weight:700}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.readout{font-family:var(--mono);font-variant-numeric:tabular-nums;background:var(--surface-2);border-radius:8px;padding:12px 14px;font-size:15px;line-height:1.7}
+.readout strong{color:var(--accent)}
+.big{font-family:var(--display);font-weight:800;font-size:40px;line-height:1;color:var(--accent)}
+.svgbox{overflow-x:auto}
+svg text{fill:var(--ink);font-family:var(--body)}
+svg .mut{fill:var(--muted)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right}
+
+/* Questions */
+.q{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.q:first-of-type{border-top:0;padding-top:0}
+.q .stem{font-weight:700}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.opt .k{font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:2px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.why{font-size:15px;border-radius:8px;padding:10px 12px;background:var(--surface-2)}
+.why.good{background:var(--good-soft)}
+.why.bad{background:var(--bad-soft)}
+.score{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.match-row b{font-family:var(--display)}
+.match-row select{width:100%}
+.match-row.right select{border-color:var(--good);background:var(--good-soft)}
+.match-row.wrong select{border-color:var(--bad);background:var(--bad-soft)}
+@media (max-width:560px){.match-row{grid-template-columns:1fr}}
+.sort-item{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.sort-item .t{flex:1 1 220px;min-width:0}
+.sort-item .bins{display:flex;gap:6px;flex-wrap:wrap}
+.bin{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px;cursor:pointer;font-size:14px}
+.bin.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sort-item.right{border-color:var(--good);background:var(--good-soft)}
+.sort-item.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.sort-item .fb{flex-basis:100%;font-size:14px;color:var(--muted)}
+.ideas{display:flex;flex-wrap:wrap;gap:8px}
+.idea{font-size:14px;border-radius:99px;padding:4px 12px;border:1px solid var(--line);color:var(--muted)}
+.idea.hit{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.model{background:var(--gold-soft);border-radius:8px;padding:12px 14px;font-size:15px}
+.model b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+
+/* Bars */
+.hbar{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:15px}
+.hbar .track{height:16px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.hbar .track i{display:block;height:100%;border-radius:4px;background:var(--accent);transition:width .4s}
+.hbar .v{font-family:var(--mono);font-size:14px;text-align:right}
+.bars{display:flex;flex-direction:column;gap:8px}
+
+/* Ladder */
+.ladder{display:flex;flex-direction:column-reverse;gap:4px;max-width:340px}
+.rung{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:center}
+.rung span{font-family:var(--mono);text-align:right;color:var(--muted)}
+.rung button{height:30px;border:1px solid var(--line);border-radius:6px;background:var(--bg);cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:13px}
+.rung button.now{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.rung button.fut{box-shadow:inset 0 0 0 3px var(--gold)}
+
+/* Veil */
+.societies{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.soc{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px}
+.soc.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.soc .pp{display:flex;gap:4px;align-items:flex-end;height:70px}
+.soc .pp i{flex:1;background:var(--c3);border-radius:3px 3px 0 0;min-height:2px}
+.soc .pp i.me{background:var(--gold)}
+
+/* Rank list */
+.rank{display:flex;flex-direction:column;gap:6px}
+.rank li{list-style:none;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.rank ol{margin:0;padding:0}
+.rank .pos{font-family:var(--mono);color:var(--accent);width:22px}
+.rank .lbl{flex:1;min-width:0}
+.rank button{border:1px solid var(--line);background:var(--surface);border-radius:6px;width:34px;height:30px;cursor:pointer}
+
+.callout{border-radius:10px;padding:14px 16px;background:var(--accent-soft);display:flex;flex-direction:column;gap:6px}
+.callout.gold{background:var(--gold-soft)}
+.next{display:flex;justify-content:flex-end}
+
+/* Chat */
+.fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:20;border:0;border-radius:99px;background:var(--gold);color:#14213d;font-weight:700;padding:13px 18px;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;display:flex;gap:8px;align-items:center}
+.chat{position:fixed;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:30;width:min(400px,calc(100vw - 28px));height:min(600px,calc(100vh - 40px));background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden}
+.chat header{background:var(--mast);color:var(--mast-ink);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chat header b{font-family:var(--display);font-size:18px}
+.chat header small{display:block;opacity:.75;font-size:12px}
+.chat header button{background:transparent;border:1px solid rgba(255,255,255,.35);color:inherit;border-radius:6px;padding:4px 10px;cursor:pointer}
+.log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:15px;line-height:1.5}
+.msg.bot{background:var(--surface-2);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.me{background:var(--accent);color:var(--accent-ink);align-self:flex-end;border-bottom-right-radius:4px}
+.msg .qo{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.msg .qo button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:14px}
+.sugs{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 8px}
+.sugs button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:4px 10px;font-size:13px;cursor:pointer}
+.chatbar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.chatbar input{flex:1;min-width:0;font-size:16px}
+footer{color:var(--muted);font-size:14px;padding-block:24px 100px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<header class="mast gutter">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">IDC4U · The Pursuit of Happiness · Midterm Review</div>
+      <h1>Measuring a <span>Country</span></h1>
+      <p class="lede">Social indicators of development, from GDP to happiness. Work through each station in order, try the tools, and check yourself as you go. Plan on about 45 minutes.</p>
+    </div>
+    <div class="meter" aria-live="polite">
+      <div class="row"><span>Activities done</span><span id="meterTxt">0 / 0</span></div>
+      <div class="bar"><i id="meterBar"></i></div>
+      <div class="row" style="margin-top:8px"><span>Points earned</span><span id="ptsTxt">0</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs gutter" aria-label="Review stations">
+  <div class="wrap" role="tablist" id="tablist"></div>
+</nav>
+
+<main class="gutter">
+<div class="wrap">
+
+<!-- 0 START -->
+<section class="station" data-tab="start" data-label="Start">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 0 · Warm-up</div>
+      <h2>What makes a country successful?</h2>
+      <span class="time">≈ 3 minutes</span>
+      <div class="prose">
+        <p>This whole unit comes back to one question. When we say a country is "doing well," what are we actually measuring? Before you review the indicators, rank these the way you would have on day one. Then come back at the end and see if your thinking changed.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Your ranking</h3></div>
+      <p class="hint">Use the arrows to put the most important measure of success at the top.</p>
+      <div class="rank"><ol id="rankList"></ol></div>
+      <div class="btnrow"><button class="btn" id="rankSave">Lock in my ranking</button><span class="score" id="rankMsg"></span></div>
+    </div>
+    <div class="callout gold">
+      <h4>How this review works</h4>
+      <p>Each station has a short explainer, a "Try it" tool, and a "Check yourself" section with multiple choice, matching, sorting, or short answer questions. The tab turns green when you finish everything in it. Stuck? Tap <b>Study Buddy</b> in the corner and ask a question, or type "quiz me."</p>
+      <p>Your progress saves in this browser, so you can come back later on the same device.</p>
+    </div>
+    <div class="next"><button class="btn" data-go="gdp">Start Station 1 →</button></div>
+  </div>
+</section>
+
+<!-- 1 GDP -->
+<section class="station" data-tab="gdp" data-label="GDP, PPP & GNI">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 1 · Economic development</div>
+      <h2>GDP per capita, PPP and GNI</h2>
+      <span class="time">≈ 6 minutes</span>
+    </div>
+    <div class="goals"><h4>You should be able to</h4><ul>
+      <li>Define GDP and GDP per capita, and explain why we divide by population.</li>
+      <li>Explain what purchasing power parity (PPP) fixes and why it matters most for poorer countries.</li>
+      <li>Classify countries as low, middle, or high income and explain the difference between GDP and GNI.</li>
+    </ul></div>
+    <div class="defs">
+      <div class="def"><b>GDP</b><small>Gross Domestic Product. The total value of new goods and services produced <em>inside</em> a country's borders in one year.</small></div>
+      <div class="def"><b>GDP per capita</b><small>GDP divided by population. The average output per person. A big country produces more in total, so per capita lets us compare living standards fairly.</small></div>
+      <div class="def"><b>PPP</b><small>Purchasing power parity. Adjusts for the cost of living using a "basket of goods" (food, rent, haircuts) so a dollar means the same amount of stuff everywhere.</small></div>
+      <div class="def"><b>GNI</b><small>Gross National Income. GDP <b>+</b> money citizens earn abroad (like remittances) <b>−</b> profits foreign companies take out.</small></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>The PPP adjuster</h3></div>
+      <p class="hint">Sachs uses Mexico in 2012: GDP per capita of about $10,200 at market exchange rates, with prices about two-thirds of U.S. prices. Move the price level and watch what happens to real living standards.</p>
+      <div class="grid2">
+        <div class="ctrl"><label for="pppPreset">Example</label>
+          <select id="pppPreset">
+            <option value="10200,66">Mexico, 2012 (from the reading)</option>
+            <option value="250,29.5">Malawi, 2012 (from the reading)</option>
+            <option value="3000,50">Sachs's "Country 2" example</option>
+          </select></div>
+        <div class="ctrl"><label for="pppNom">GDP per capita at exchange rates <span class="num" id="pppNomV"></span></label><input type="range" id="pppNom" min="200" max="60000" step="100"></div>
+        <div class="ctrl"><label for="pppPL">Price level (% of U.S. prices) <span class="num" id="pppPLV"></span></label><input type="range" id="pppPL" min="20" max="140" step="0.5"></div>
+      </div>
+      <div class="bars" id="pppBars"></div>
+      <div class="readout" id="pppOut"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>GDP vs GNI: the Ireland problem</h3></div>
+      <p class="hint">Ireland hosts lots of foreign tech and pharma companies. Their production counts in Irish GDP, but much of the profit leaves. Adjust the flows for an imaginary country (values per person).</p>
+      <div class="grid2">
+        <div class="ctrl"><label for="gGDP">GDP per capita <span class="num" id="gGDPv"></span></label><input type="range" id="gGDP" min="10000" max="120000" step="1000" value="100000"></div>
+        <div class="ctrl"><label for="gIn">Income citizens earn abroad (+) <span class="num" id="gInv"></span></label><input type="range" id="gIn" min="0" max="20000" step="500" value="4000"></div>
+        <div class="ctrl"><label for="gOut">Profits foreign firms send home (−) <span class="num" id="gOutv"></span></label><input type="range" id="gOut" min="0" max="50000" step="500" value="30000"></div>
+      </div>
+      <div class="readout" id="gniOut"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Sort by income group</h3></div>
+      <p class="hint">Use the thresholds from class: low income below $1,035, middle income $1,035 to $12,615, high income $12,616 and up.</p>
+      <div id="act-income"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Quick questions</h3></div>
+      <div id="act-gdpmcq"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="beyond">Next: Beyond GDP →</button></div>
+  </div>
+</section>
+
+<!-- 2 BEYOND GDP -->
+<section class="station" data-tab="beyond" data-label="Beyond GDP">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 2 · The critique</div>
+      <h2>What GDP can't see</h2>
+      <span class="time">≈ 5 minutes</span>
+      <div class="prose">
+        <p>GDP counts every market transaction. It does not ask whether that transaction made anyone's life better. A car crash that leads to repairs, hospital bills and lawyers raises GDP. A family that cooks dinner together and goes for a walk adds almost nothing. That's the point of the reading we did on the "ideal GDP citizen."</p>
+        <p>GDP is still useful. For a very poor country, growing output means food, clean water, schools and clinics, so focusing on GDP growth makes sense there. The problem comes when a rich country treats more GDP as the goal in itself.</p>
+      </div>
+    </div>
+    <div class="quote">"The gross national product measures everything, except that which makes life worthwhile."<cite>Robert F. Kennedy, 1968</cite></div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Diminishing returns</h3></div>
+      <p class="hint">An extra dollar matters hugely to a poor family and barely at all to a rich one. This illustrative curve follows the pattern from class, where gains in life satisfaction flatten out somewhere around $80,000 to $100,000. Drag the slider and see what one extra $1,000 is worth.</p>
+      <div class="ctrl"><label for="drInc">Household income <span class="num" id="drIncV"></span></label><input type="range" id="drInc" min="2000" max="150000" step="1000" value="10000"></div>
+      <div class="svgbox"><svg id="drSvg" viewBox="0 0 640 280" width="100%" role="img" aria-label="Curve showing life satisfaction rising quickly at low incomes and flattening at high incomes"></svg></div>
+      <div class="readout" id="drOut"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Does it raise GDP?</h3></div>
+      <p class="hint">Decide whether each activity adds to GDP. Some of these are the uncomfortable ones from the reading.</p>
+      <div id="act-gdpcount"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Short answer</h3></div>
+      <div id="act-gdpshort"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="hdi">Next: HDI →</button></div>
+  </div>
+</section>
+
+<!-- 3 HDI -->
+<section class="station" data-tab="hdi" data-label="HDI">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 3 · Human development</div>
+      <h2>The Human Development Index</h2>
+      <span class="time">≈ 6 minutes</span>
+      <div class="prose">
+        <p>The UN Development Programme created the <span class="term">HDI</span> to give a fuller picture than income alone. It combines three dimensions: a <b>long and healthy life</b> (life expectancy at birth), <b>knowledge</b> (mean years of schooling for adults and expected years of schooling for kids), and a <b>decent standard of living</b> (GNI per capita, PPP). The score runs from 0 to 1.</p>
+        <p>The income part uses a logarithm, so each extra dollar counts for less as a country gets richer, and anything above $75,000 adds nothing. That's diminishing returns built right into the formula. Countries are grouped as Very High (0.800+), High (0.700 to 0.799), Medium (0.550 to 0.699) and Low (below 0.550).</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Build an HDI</h3></div>
+      <p class="hint">Load a real country (UNDP Human Development Report 2025, data for 2023) or invent your own. The calculator uses the UNDP's actual formula, so your result should land on or very near the official value.</p>
+      <div class="ctrl"><label for="hdiPreset">Load a country</label><select id="hdiPreset"></select></div>
+      <div class="grid2">
+        <div class="ctrl"><label for="hLE">Life expectancy (years) <span class="num" id="hLEv"></span></label><input type="range" id="hLE" min="40" max="86" step="0.1"></div>
+        <div class="ctrl"><label for="hMYS">Mean years of schooling <span class="num" id="hMYSv"></span></label><input type="range" id="hMYS" min="0" max="15" step="0.1"></div>
+        <div class="ctrl"><label for="hEYS">Expected years of schooling <span class="num" id="hEYSv"></span></label><input type="range" id="hEYS" min="3" max="20" step="0.1"></div>
+        <div class="ctrl"><label for="hGNI">GNI per capita (PPP $) <span class="num" id="hGNIv"></span></label><input type="range" id="hGNI" min="6.9" max="11.8" step="0.01"></div>
+      </div>
+      <div class="bars" id="hdiBars"></div>
+      <div class="grid2" style="align-items:center">
+        <div><div class="score">Calculated HDI</div><div class="big" id="hdiBig">0.000</div></div>
+        <div class="readout" id="hdiOut"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Rich on paper, poor in life</h3></div>
+      <p class="hint">From Table 2.1 in the Sachs reading. A lower rank number is better. Countries above the line rank higher on HDI than on GDP; countries that slide down rank much lower on HDI than their wealth would suggest.</p>
+      <div class="svgbox"><svg id="slopeSvg" viewBox="0 0 640 380" width="100%" role="img" aria-label="Slope chart of GDP per capita rank versus HDI rank for eight countries"></svg></div>
+      <div class="callout"><p><b>Equatorial Guinea</b> is the class example. Oil and gas made it rich on paper: GDP per capita topped $19,000 in 2008 and it ranked 41st in the world for income, yet 144th on HDI. In the 2025 report its life expectancy was still just 63.7 years with 8.3 mean years of schooling. The money hadn't reached most people.</p></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Quick questions</h3></div>
+      <div id="act-hdimcq"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="curse">Next: The Resource Curse →</button></div>
+  </div>
+</section>
+
+<!-- 4 RESOURCE CURSE -->
+<section class="station" data-tab="curse" data-label="Resource Curse">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 4 · Paradox of plenty</div>
+      <h2>The Resource Curse</h2>
+      <span class="time">≈ 5 minutes</span>
+      <div class="prose">
+        <p>You'd think finding oil would make a country rich. Often it does the opposite. The <span class="term">resource curse</span> describes countries with abundant oil, gas or minerals that end up with slower growth, weaker institutions and more conflict than countries with fewer resources. Sachs connects it to inequality: when government revenue flows to a small circle of insiders, the resource becomes a source of corruption instead of development.</p>
+        <p>The curse is not destiny. Norway, Canada and Botswana all have major resources and avoided the worst of it, mostly because strong, transparent institutions were in place to manage the wealth and share it (Norway's sovereign wealth fund is the classic example).</p>
+      </div>
+    </div>
+    <div class="defs">
+      <div class="def"><b>Dutch Disease</b><small>Resource exports push up the currency's value, which makes the country's other exports (farming, manufacturing) too expensive to compete.</small></div>
+      <div class="def"><b>Corruption &amp; weak institutions</b><small>Resource wealth fuels elite power and weakens democracy and transparency.</small></div>
+      <div class="def"><b>Conflict</b><small>Competing groups fight over control of valuable resources.</small></div>
+      <div class="def"><b>Inequality</b><small>The wealth goes to a small elite while most people stay poor.</small></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Match the mechanism</h3></div>
+      <p class="hint">Match each scenario to the part of the resource curse it shows.</p>
+      <div id="act-cursematch"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Cursed or avoided?</h3></div>
+      <div id="act-cursesort"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Short answer</h3></div>
+      <div id="act-curseshort"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="inequality">Next: Inequality →</button></div>
+  </div>
+</section>
+
+<!-- 5 INEQUALITY -->
+<section class="station" data-tab="inequality" data-label="Inequality">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 5 · Distribution</div>
+      <h2>Measuring inequality</h2>
+      <span class="time">≈ 8 minutes</span>
+      <div class="prose">
+        <p>Here, inequality means the gap in income <b>within</b> a country, not between countries. Averages hide it. Remember the man with his feet in the fire and his head on ice who says the temperature is "on average just fine." Or imagine a class where everyone's allowance is $0 except one person who gets $1,000. The average allowance looks healthy. Nobody's life does.</p>
+      </div>
+    </div>
+    <div class="defs">
+      <div class="def"><b>Gini coefficient</b><small>0 means perfect equality, 1 (or 100) means one person has everything. Roughly: 0.25 to 0.35 more equal, 0.35 to 0.45 moderate, 0.45+ more concerning. There's no "perfect" Gini.</small></div>
+      <div class="def"><b>Lorenz curve</b><small>Plots the cumulative share of income against the cumulative share of people. The further it sags from the line of equality, the higher the Gini.</small></div>
+      <div class="def"><b>Quintile ratio</b><small>Average income of the richest 20% divided by the average income of the poorest 20%.</small></div>
+      <div class="def"><b>Income share of top 1%</b><small>How much of all income goes to the richest 1%. In class: Brazil 28.4%, Canada 13.6%, Finland 7.3%.</small></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Bend the Lorenz curve</h3></div>
+      <p class="hint">Slide toward "unequal" and watch the curve sag. The shaded gap between the curve and the line of equality is what the Gini coefficient measures.</p>
+      <div class="ctrl"><label for="lzK">More equal ← → More unequal <span class="num" id="lzKv"></span></label><input type="range" id="lzK" min="1" max="5" step="0.05" value="1.8"></div>
+      <div class="grid2" style="align-items:start">
+        <div class="svgbox"><svg id="lzSvg" viewBox="0 0 320 320" width="100%" role="img" aria-label="Lorenz curve"></svg></div>
+        <div class="stack" style="gap:12px">
+          <div><div class="score">Gini coefficient</div><div class="big" id="lzGini">0.00</div></div>
+          <div class="bars" id="lzQ"></div>
+          <div class="readout" id="lzOut"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Real Gini scores, rich countries</h3></div>
+      <p class="hint">From Figure 2.6 in the reading (OECD, late 2000s). Getting richer doesn't automatically make a country more equal or less equal. Northern Europe chose a path of wealth with equality; the U.S. chose rising incomes alongside rising inequality.</p>
+      <div class="bars" id="oecdBars"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>The veil of ignorance</h3></div>
+      <p class="hint">Philosopher John Rawls asked how you'd design a fair society if you didn't know who you'd be in it. Each society below has five people with these yearly incomes. Pick the one you want to live in, then lift the veil to find out who you are.</p>
+      <div class="societies" id="socs"></div>
+      <div class="btnrow"><button class="btn" id="veilBtn" disabled>Lift the veil</button><span class="score" id="veilMsg">Choose a society first.</span></div>
+      <div class="readout" id="veilOut" hidden></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>IHDI: the cost of inequality</h3></div>
+      <p class="hint">The HDI shows a country's potential. The <b>Inequality-adjusted HDI</b> shows what people actually experience once inequality is accounted for. The loss = (HDI − IHDI) ÷ HDI. These four come from the slides. Calculate the loss for each, then check.</p>
+      <div class="tbl"><table id="ihdiTbl"><thead><tr><th>Country</th><th class="num">HDI</th><th class="num">IHDI</th><th class="num">Your loss %</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="btnrow"><button class="btn" id="ihdiCheck">Check my math</button><span class="score" id="ihdiMsg"></span></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Quick questions</h3></div>
+      <div id="act-ineqmcq"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Short answer</h3></div>
+      <div id="act-ineqshort"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="people">Next: People &amp; Planet →</button></div>
+  </div>
+</section>
+
+<!-- 6 PEOPLE & PLANET -->
+<section class="station" data-tab="people" data-label="People & Planet">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 6 · Demographic, gender &amp; environmental indicators</div>
+      <h2>People, gender and the planet</h2>
+      <span class="time">≈ 5 minutes</span>
+      <div class="prose">
+        <p>Development isn't only about money. Demographic indicators tell us how a population is changing. The <span class="term">Gender Inequality Index (GII)</span> looks at reproductive health (like the adolescent birth rate), empowerment (like the share of seats in parliament held by women) and the labour market (participation of men vs women). The <span class="term">Planetary pressures-adjusted HDI (PHDI)</span> lowers a country's HDI based on its carbon dioxide emissions and material footprint per person, because development that wrecks the planet isn't sustainable.</p>
+      </div>
+    </div>
+    <div class="defs">
+      <div class="def"><b>Crude Birth Rate</b><small>Live births in a year per 1,000 people.</small></div>
+      <div class="def"><b>Crude Death Rate</b><small>Deaths in a year per 1,000 people.</small></div>
+      <div class="def"><b>Natural Increase Rate</b><small>CBR − CDR, shown as a percent. Since the rates are per 1,000, divide by 10: (30 − 10) ÷ 10 = 2.0%.</small></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Natural increase calculator</h3></div>
+      <div class="grid2">
+        <div class="ctrl"><label for="nCBR">Crude birth rate (per 1,000) <span class="num" id="nCBRv"></span></label><input type="range" id="nCBR" min="5" max="50" step="1" value="34"></div>
+        <div class="ctrl"><label for="nCDR">Crude death rate (per 1,000) <span class="num" id="nCDRv"></span></label><input type="range" id="nCDR" min="3" max="20" step="1" value="9"></div>
+      </div>
+      <div class="readout" id="nirOut"></div>
+    </div>
+    <div class="callout">
+      <h4>Trends: always ask WHY</h4>
+      <p>A number on its own tells you what. A trend over time tells you something happened. When you see a graph change, ask what happened in that country to make it look that way. For example, women's labour force participation in Afghanistan collapsed after the Taliban returned to power in 2021 and restricted women's work and education. The graph only makes sense when you know the history.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Which index is it?</h3></div>
+      <p class="hint">Sort each indicator into the index it belongs to.</p>
+      <div id="act-indexsort"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Quick questions</h3></div>
+      <div id="act-peoplemcq"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="happy">Next: Happiness →</button></div>
+  </div>
+</section>
+
+<!-- 7 HAPPINESS -->
+<section class="station" data-tab="happy" data-label="Happiness">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 7 · Subjective wellbeing</div>
+      <h2>Can you measure happiness?</h2>
+      <span class="time">≈ 6 minutes</span>
+      <div class="prose">
+        <p>Aristotle argued the purpose of politics is the wellbeing of the people. His word was <span class="term">eudaimonia</span>: flourishing, or living well. Modern researchers split wellbeing in two. <span class="term">Affective</span> wellbeing asks about recent emotions: did you smile yesterday, were you happy? <span class="term">Evaluative</span> wellbeing asks you to judge your life as a whole. The evaluative kind is what countries get ranked on.</p>
+        <p>The <b>World Happiness Report</b> uses the <span class="term">Cantril ladder</span>, then explains the differences between countries with six variables: GDP per capita, social support, healthy life expectancy, freedom to make life choices, generosity, and perceptions of corruption. Sachs points out that social trust and relationships matter enormously, and that very materialistic people report <em>less</em> life satisfaction than people who value generosity.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>Climb the Cantril ladder</h3></div>
+      <p class="hint">Imagine a ladder from 0 (worst possible life for you) to 10 (best possible life for you). Click where you stand now, then click again where you think you'll be in five years.</p>
+      <div class="grid2" style="align-items:start">
+        <div class="ladder" id="ladder"></div>
+        <div class="stack" style="gap:12px">
+          <div class="readout" id="ladderOut">Click a rung for "now."</div>
+          <div class="bars" id="whrBars"></div>
+          <p class="hint">Ladder scores from the World Happiness Report 2025 for a few countries. Afghanistan's 1.4 is the lowest ever recorded in the report.</p>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Affective or evaluative?</h3></div>
+      <div id="act-affsort"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Match the World Happiness Report variables</h3></div>
+      <div id="act-whrmatch"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Short answer</h3></div>
+      <div id="act-happyshort"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="gap">Next: Rich &amp; Poor Over Time →</button></div>
+  </div>
+</section>
+
+<!-- 8 GAP -->
+<section class="station" data-tab="gap" data-label="Rich & Poor Over Time">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 8 · From the Sachs reading</div>
+      <h2>An unequal world, over time</h2>
+      <span class="time">≈ 4 minutes</span>
+      <div class="prose">
+        <p><b>Urban vs rural.</b> Cities tend to have higher incomes, better public services, more education and lower fertility rates. Rural families tend to be larger, partly because children help on the farm. Almost all future population growth is expected to be urban.</p>
+        <p><b>Least-developed countries (LDCs).</b> The UN's group of about fifty very poor, vulnerable countries, concentrated in tropical Africa and Asia. Many are landlocked (Niger, Mali, Chad, Afghanistan), which makes trade harder, or small islands exposed to storms and high shipping costs.</p>
+        <p><b>Convergence vs divergence.</b> Convergence means poor countries close the gap with rich ones; divergence means the gap grows. From about 1750 to 1950 the world mostly diverged (industrialization in a few places, then imperialism). Since the end of empire, convergence has gained the upper hand, though not everywhere.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>China vs Niger</h3></div>
+      <p class="hint">GDP per person (PPP) as a percent of the United States, from the reading. Toggle the year.</p>
+      <div class="btnrow"><button class="btn" id="cv1980">1980</button><button class="btn ghost" id="cv2010">2010</button></div>
+      <div class="bars" id="cvBars"></div>
+      <div class="readout" id="cvOut"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Try it</span><h3>The rule of 70</h3></div>
+      <p class="hint">Divide 70 by a growth rate to find how many years it takes to double. Sachs uses it for African cities growing 5% a year, and China's economy doubled about every 7 years.</p>
+      <div class="ctrl"><label for="r70">Annual growth rate <span class="num" id="r70v"></span></label><input type="range" id="r70" min="0.5" max="12" step="0.5" value="5"></div>
+      <div class="readout" id="r70Out"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Quick questions</h3></div>
+      <div id="act-gapmcq"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="compare">Next: Compare Countries →</button></div>
+  </div>
+</section>
+
+<!-- 9 COMPARE -->
+<section class="station" data-tab="compare" data-label="Compare Countries">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 9 · Data detective</div>
+      <h2>Compare countries</h2>
+      <span class="time">≈ 5 minutes</span>
+      <div class="prose"><p>Pick any two countries and compare them on the HDI ingredients. All data is from the UNDP Human Development Report 2025 (2023 values). Use the tool to answer the detective questions below.</p></div>
+    </div>
+    <div class="panel">
+      <div class="grid2">
+        <div class="ctrl"><label for="cmpA">Country A</label><select id="cmpA"></select></div>
+        <div class="ctrl"><label for="cmpB">Country B</label><select id="cmpB"></select></div>
+      </div>
+      <div id="cmpOut" class="stack" style="gap:14px"></div>
+      <h4>Income vs human development, all 16 countries</h4>
+      <p class="hint">Each dot is a country. The x-axis is GNI per capita on a log scale, so each step to the right is ten times richer. Your two picks are highlighted.</p>
+      <div class="svgbox"><svg id="scatter" viewBox="0 0 660 380" width="100%" role="img" aria-label="Scatter plot of GNI per capita versus HDI"></svg></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Check yourself</span><h3>Detective questions</h3></div>
+      <div id="act-detective"></div>
+    </div>
+    <div class="next"><button class="btn" data-go="final">Next: Final Challenge →</button></div>
+  </div>
+</section>
+
+<!-- 10 FINAL -->
+<section class="station" data-tab="final" data-label="Final Challenge">
+  <div class="stack">
+    <div class="intro">
+      <div class="eyebrow">Station 10 · Put it together</div>
+      <h2>Final challenge</h2>
+      <span class="time">≈ 8 minutes</span>
+      <div class="prose"><p>Mixed questions from every station, the way they might show up on the midterm. Then two bigger written responses. Take your time on those and use specific indicators and examples.</p></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Mixed review</span><h3>Multiple choice</h3></div>
+      <div id="act-finalmcq"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Written response</span><h3>Response 1</h3></div>
+      <div id="act-final1"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip gold">Written response</span><h3>Response 2</h3></div>
+      <div id="act-final2"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="chip">Reflect</span><h3>Back to the start</h3></div>
+      <p>Here's the ranking you made at the start. Would you change it now? What would be in your <b>ultimate index of social wellbeing</b>?</p>
+      <div class="readout" id="rankEcho">You haven't locked in a ranking yet. Head back to Start.</div>
+      <div id="summary" class="callout gold"></div>
+      <div class="btnrow"><button class="btn ghost" id="resetAll">Reset all my progress</button><span class="score" id="resetMsg"></span></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer class="gutter"><div class="wrap">
+  <p>Built for IDC4U. Sources: class slides "Indicators of Development"; Jeffrey D. Sachs, <em>The Age of Sustainable Development</em>, Chapter 2 "An Unequal World"; UNDP Human Development Report 2025, Table 1; World Happiness Report 2025. The diminishing-returns and Lorenz tools are illustrative models.</p>
+</div></footer>
+
+<button class="fab" id="fab" aria-label="Open Study Buddy">💬 Study Buddy</button>
+<div class="chat" id="chat" hidden role="dialog" aria-label="Study Buddy chat">
+  <header><div><b>Study Buddy</b><small>Ask about any indicator, or type "quiz me"</small></div><button id="chatClose">Close</button></header>
+  <div class="log" id="log" aria-live="polite"></div>
+  <div class="sugs" id="sugs"></div>
+  <div class="chatbar" id="chatBar"><input type="text" id="chatIn" placeholder="e.g. What's the difference between GDP and GNI?" autocomplete="off" enterkeyhint="send" aria-label="Your question"><button class="btn" type="button" id="chatSend">Send</button></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const el = (tag, attrs={}, html) => { const e=document.createElement(tag); for(const k in attrs){ if(k==="class") e.className=attrs[k]; else e.setAttribute(k,attrs[k]); } if(html!=null) e.innerHTML=html; return e; };
+const fmt$ = n => "$" + Math.round(n).toLocaleString("en-CA");
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+/* ---------- State ---------- */
+const KEY="idc4u-indicators-v1";
+let S = { results:{}, rank:null, tab:"start", ladder:{} };
+try{ const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S, JSON.parse(raw)); }catch(e){}
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} updateMeter(); };
+
+/* ---------- Data ---------- */
+const HDR = [ // UNDP HDR 2025 Table 1 (2023 data)
+  {c:"Norway", rank:2, hdi:.970, le:83.3, eys:18.8, mys:13.1, gni:112710},
+  {c:"Finland", rank:12, hdi:.948, le:81.9, eys:19.5, mys:13.0, gni:57068},
+  {c:"Canada", rank:16, hdi:.939, le:82.6, eys:15.9, mys:13.9, gni:54688},
+  {c:"United States", rank:17, hdi:.938, le:79.3, eys:15.9, mys:13.9, gni:73650},
+  {c:"South Korea", rank:20, hdi:.937, le:84.3, eys:16.6, mys:12.7, gni:49726},
+  {c:"Qatar", rank:43, hdi:.886, le:82.4, eys:13.1, mys:10.8, gni:105353},
+  {c:"Costa Rica", rank:62, hdi:.833, le:80.8, eys:16.3, mys:8.8, gni:23417},
+  {c:"China", rank:78, hdi:.797, le:78.0, eys:15.5, mys:8.0, gni:22029},
+  {c:"Brazil", rank:84, hdi:.786, le:75.8, eys:15.8, mys:8.4, gni:18011},
+  {c:"Botswana", rank:111, hdi:.731, le:69.2, eys:11.4, mys:10.5, gni:16984},
+  {c:"India", rank:130, hdi:.685, le:72.0, eys:13.0, mys:6.9, gni:9047},
+  {c:"Equatorial Guinea", rank:133, hdi:.674, le:63.7, eys:12.5, mys:8.3, gni:12762},
+  {c:"Ghana", rank:143, hdi:.628, le:65.5, eys:11.4, mys:7.1, gni:6846},
+  {c:"Nigeria", rank:164, hdi:.560, le:54.5, eys:10.5, mys:7.6, gni:5569},
+  {c:"Afghanistan", rank:181, hdi:.496, le:66.0, eys:10.8, mys:2.5, gni:1972},
+  {c:"Niger", rank:188, hdi:.419, le:61.2, eys:8.3, mys:1.4, gni:1590}
+];
+const hdiTier = v => v>=.8?"Very High":v>=.7?"High":v>=.55?"Medium":"Low";
+
+/* ---------- Activity registry ---------- */
+const ACTS = {}; // key -> tab
+function record(key, score, max){ S.results[key]={score,max}; save(); }
+function totalPts(){ let s=0; for(const k in S.results) s+=S.results[k].score||0; return s; }
+
+/* ---------- Tabs ---------- */
+const stations = $$("section.station");
+const tablist = $("#tablist");
+stations.forEach((s,i)=>{
+  const id=s.dataset.tab;
+  const b=el("button",{class:"tab",role:"tab",id:"tab-"+id,"aria-controls":id,"aria-selected":"false"},`<span class="n"><b>${i}</b></span>${s.dataset.label}`);
+  s.id=id;
+  b.addEventListener("click",()=>show(id,true));
+  tablist.appendChild(b);
+});
+function show(id, push){
+  if(!document.getElementById(id)) id="start";
+  stations.forEach(s=>s.classList.toggle("on", s.dataset.tab===id));
+  $$(".tab").forEach(t=>t.setAttribute("aria-selected", t.id==="tab-"+id ? "true":"false"));
+  const t=$("#tab-"+id); if(t) t.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
+  S.tab=id; save();
+  if(push){ try{ history.replaceState(null,"","#"+id); }catch(e){ location.hash=id; } window.scrollTo({top:0}); }
+  if(id==="final") renderSummary();
+}
+$$("[data-go]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.go,true)));
+window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
+
+function updateMeter(){
+  const keys=Object.keys(ACTS); const done=keys.filter(k=>S.results[k]).length;
+  $("#meterTxt").textContent=done+" / "+keys.length;
+  $("#meterBar").style.width=(keys.length? done/keys.length*100:0)+"%";
+  $("#ptsTxt").textContent=totalPts();
+  stations.forEach(s=>{
+    const id=s.dataset.tab; const ks=keys.filter(k=>ACTS[k]===id);
+    const t=$("#tab-"+id); if(t) t.classList.toggle("done", ks.length>0 && ks.every(k=>S.results[k]));
+  });
+  const st=$("#tab-start"); if(st) st.classList.toggle("done", !!S.rank);
+}
+
+/* ---------- Question renderers ---------- */
+function reg(key, container){ ACTS[key]=container.closest("section").dataset.tab; }
+
+function mcq(id, qs, opts={}){
+  const box=$("#"+id); reg(id, box);
+  const prev=S.results[id];
+  let answered=0, right=0;
+  const scoreEl=el("div",{class:"score"});
+  qs.forEach((q,qi)=>{
+    const w=el("div",{class:"q"});
+    w.appendChild(el("div",{class:"stem"},(qi+1)+". "+q.q));
+    const o=el("div",{class:"opts"}); w.appendChild(o);
+    const why=el("div",{class:"why"}); why.hidden=true; w.appendChild(why);
+    q.o.forEach((t,oi)=>{
+      const b=el("button",{class:"opt",type:"button"},`<span class="k">${"ABCD"[oi]}</span><span>${t}</span>`);
+      b.addEventListener("click",()=>{
+        $$("button",o).forEach(x=>x.disabled=true);
+        const ok=oi===q.a; answered++; if(ok) right++;
+        b.classList.add(ok?"right":"wrong");
+        o.children[q.a].classList.add("right");
+        why.hidden=false; why.className="why "+(ok?"good":"bad");
+        why.innerHTML=(ok?"<b>Yes.</b> ":"<b>Not quite.</b> ")+q.w;
+        scoreEl.textContent=`${right} / ${answered} correct so far`;
+        if(answered===qs.length){ record(id,right,qs.length); scoreEl.textContent=`You got ${right} out of ${qs.length}.`; }
+      });
+      o.appendChild(b);
+    });
+    box.appendChild(w);
+  });
+  box.appendChild(scoreEl);
+  if(prev) scoreEl.textContent=`Last time: ${prev.score} out of ${prev.max}. Answer again to update.`;
+}
+
+function matching(id, pairs, prompt){
+  const box=$("#"+id); reg(id, box);
+  const answers=shuffle(pairs.map(p=>p[1]));
+  const rows=pairs.map(([term,ans])=>{
+    const r=el("div",{class:"match-row"});
+    r.appendChild(el("b",{},term));
+    const s=el("select",{"aria-label":"Match for "+term.replace(/<[^>]+>/g,""), id:id+"-"+term.replace(/\W/g,"").slice(0,20)});
+    s.appendChild(el("option",{value:""},"Choose…"));
+    answers.forEach(a=>s.appendChild(el("option",{value:a},a)));
+    r.appendChild(s); box.appendChild(r);
+    return {r,s,ans};
+  });
+  const row=el("div",{class:"btnrow"}); const btn=el("button",{class:"btn",type:"button"},"Check matches"); const sc=el("span",{class:"score"});
+  row.append(btn,sc); box.appendChild(row);
+  btn.addEventListener("click",()=>{
+    if(rows.some(x=>!x.s.value)){ sc.textContent="Match every item first."; return; }
+    let n=0; rows.forEach(x=>{ const ok=x.s.value===x.ans; if(ok)n++; x.r.classList.toggle("right",ok); x.r.classList.toggle("wrong",!ok); });
+    sc.textContent=`${n} / ${rows.length} correct.`+(n<rows.length?" Fix the red ones and check again.":" Nice work.");
+    record(id,n,rows.length);
+  });
+  if(S.results[id]) sc.textContent=`Last time: ${S.results[id].score} / ${S.results[id].max}.`;
+}
+
+function sorter(id, cats, items){
+  const box=$("#"+id); reg(id, box);
+  const picks={};
+  const rows=shuffle(items).map((it,i)=>{
+    const r=el("div",{class:"sort-item"});
+    r.appendChild(el("div",{class:"t"},it.t));
+    const bins=el("div",{class:"bins"});
+    cats.forEach(c=>{ const b=el("button",{class:"bin",type:"button"},c); b.addEventListener("click",()=>{ picks[i]=c; $$(".bin",bins).forEach(x=>x.classList.toggle("sel",x===b)); }); bins.appendChild(b); });
+    r.appendChild(bins);
+    const fb=el("div",{class:"fb"}); fb.hidden=true; r.appendChild(fb);
+    box.appendChild(r);
+    return {r,it,fb,i};
+  });
+  const row=el("div",{class:"btnrow"}); const btn=el("button",{class:"btn",type:"button"},"Check"); const sc=el("span",{class:"score"});
+  row.append(btn,sc); box.appendChild(row);
+  btn.addEventListener("click",()=>{
+    if(rows.some(x=>!picks[x.i])){ sc.textContent="Sort every item first."; return; }
+    let n=0; rows.forEach(x=>{ const ok=picks[x.i]===x.it.c; if(ok)n++; x.r.classList.toggle("right",ok); x.r.classList.toggle("wrong",!ok); x.fb.hidden=false; x.fb.innerHTML=(ok?"":"Answer: <b>"+x.it.c+"</b>. ")+x.it.w; });
+    sc.textContent=`${n} / ${rows.length} correct.`; record(id,n,rows.length);
+  });
+  if(S.results[id]) sc.textContent=`Last time: ${S.results[id].score} / ${S.results[id].max}.`;
+}
+
+function shortAns(id, cfg){
+  const box=$("#"+id); reg(id, box);
+  box.appendChild(el("p",{class:"stem",style:"font-weight:700"},cfg.prompt));
+  const ta=el("textarea",{id:id+"-ta","aria-label":"Your answer",placeholder:"Write your answer here. Aim for 3 to 5 sentences."});
+  try{ const d=localStorage.getItem(KEY+"-"+id); if(d) ta.value=d; }catch(e){}
+  ta.addEventListener("input",()=>{ try{ localStorage.setItem(KEY+"-"+id, ta.value); }catch(e){} });
+  box.appendChild(ta);
+  const row=el("div",{class:"btnrow"}); const btn=el("button",{class:"btn",type:"button"},"Check my answer"); const sc=el("span",{class:"score"}); row.append(btn,sc); box.appendChild(row);
+  const ideasLbl=el("p",{class:"hint"},"Key ideas a strong answer includes (green means your answer seems to mention it):"); ideasLbl.hidden=true;
+  const ideas=el("div",{class:"ideas"}); ideas.hidden=true;
+  const model=el("div",{class:"model"},"<b>Sample strong answer</b>"+cfg.model); model.hidden=true;
+  box.append(ideasLbl,ideas,model);
+  btn.addEventListener("click",()=>{
+    const txt=ta.value.toLowerCase();
+    if(txt.trim().split(/\s+/).length<12){ sc.textContent="Write a bit more first (at least a couple of sentences)."; return; }
+    ideas.innerHTML=""; let hits=0;
+    cfg.ideas.forEach(([label,words])=>{ const hit=words.some(w=>txt.includes(w)); if(hit)hits++; ideas.appendChild(el("span",{class:"idea"+(hit?" hit":"")},label)); });
+    ideasLbl.hidden=false; ideas.hidden=false; model.hidden=false;
+    sc.textContent=`You touched on ${hits} of ${cfg.ideas.length} key ideas. Compare with the sample below.`;
+    record(id,hits,cfg.ideas.length);
+  });
+}
+
+/* ---------- Station 0: ranking ---------- */
+const RANK_ITEMS=["Wealth (GDP per capita)","Health and long lives","Education","Happiness and life satisfaction","Fairness and equality","A healthy environment"];
+let rankOrder = S.rank ? S.rank.slice() : RANK_ITEMS.slice();
+function drawRank(){
+  const ol=$("#rankList"); ol.innerHTML="";
+  rankOrder.forEach((t,i)=>{
+    const li=el("li",{},`<span class="pos">${i+1}</span><span class="lbl">${t}</span>`);
+    const up=el("button",{type:"button","aria-label":"Move "+t+" up"},"▲"); const dn=el("button",{type:"button","aria-label":"Move "+t+" down"},"▼");
+    up.disabled=i===0; dn.disabled=i===rankOrder.length-1;
+    up.onclick=()=>{ [rankOrder[i-1],rankOrder[i]]=[rankOrder[i],rankOrder[i-1]]; drawRank(); };
+    dn.onclick=()=>{ [rankOrder[i+1],rankOrder[i]]=[rankOrder[i],rankOrder[i+1]]; drawRank(); };
+    li.append(up,dn); ol.appendChild(li);
+  });
+}
+drawRank();
+$("#rankSave").onclick=()=>{ S.rank=rankOrder.slice(); save(); $("#rankMsg").textContent="Locked in. You'll see it again in the Final Challenge."; };
+if(S.rank) $("#rankMsg").textContent="Your saved ranking is shown. Lock it in again if you change it.";
+
+/* ---------- Station 1 ---------- */
+function bar(label, val, max, txt, color){
+  return `<div class="hbar"><span>${label}</span><span class="track"><i style="width:${Math.max(0,Math.min(100,val/max*100))}%;background:${color||"var(--accent)"}"></i></span><span class="v">${txt}</span></div>`;
+}
+function ppp(){
+  const nom=+$("#pppNom").value, pl=+$("#pppPL").value; const p=nom/(pl/100);
+  $("#pppNomV").textContent=fmt$(nom); $("#pppPLV").textContent=pl+"%";
+  const m=Math.max(nom,p,1);
+  $("#pppBars").innerHTML=bar("Exchange rate",nom,m,fmt$(nom),"var(--c3)")+bar("PPP adjusted",p,m,fmt$(p),"var(--accent)");
+  const us=51000;
+  $("#pppOut").innerHTML=`PPP GDP per capita = ${fmt$(nom)} ÷ ${(pl/100).toFixed(3)} = <strong>${fmt$(p)}</strong><br>`+
+   (pl<100?`Prices here are lower than in the U.S., so money stretches further. Compared with the U.S. (about $51,000 in 2012), the gap shrinks from ${(us/nom).toFixed(1)}× to <strong>${(us/p).toFixed(1)}×</strong>.`:
+    pl>100?`Prices here are higher than in the U.S., so the PPP figure is <em>lower</em>. Living standards are worse than the exchange rate suggests.`:`Prices equal U.S. prices, so PPP changes nothing.`);
+}
+function pppPreset(){ const [n,p]=$("#pppPreset").value.split(","); $("#pppNom").value=n; $("#pppPL").value=p; ppp(); }
+$("#pppPreset").onchange=pppPreset; $("#pppNom").oninput=ppp; $("#pppPL").oninput=ppp; pppPreset();
+
+function gni(){
+  const g=+$("#gGDP").value, i=+$("#gIn").value, o=+$("#gOut").value, n=g+i-o;
+  $("#gGDPv").textContent=fmt$(g); $("#gInv").textContent="+"+fmt$(i); $("#gOutv").textContent="−"+fmt$(o);
+  $("#gniOut").innerHTML=`GNI = ${fmt$(g)} + ${fmt$(i)} − ${fmt$(o)} = <strong>${fmt$(n)}</strong><br>`+
+   (n<g?`GDP is bigger than GNI by ${fmt$(g-n)}. Like Ireland, this country <strong>looks richer than its people feel</strong>, because much of what's produced here belongs to foreign owners.`:
+    n>g?`GNI is bigger than GDP. Citizens earn a lot from outside the country, for example through remittances (money sent home by family working abroad). Countries like the Philippines or Haiti often look like this.`:`GDP and GNI are equal.`);
+}
+["gGDP","gIn","gOut"].forEach(x=>$("#"+x).oninput=gni); gni();
+
+sorter("act-income",["Low","Middle","High"],[
+  {t:"Country A: GDP per capita $640",c:"Low",w:"Below $1,035."},
+  {t:"Country B: GDP per capita $2,900",c:"Middle",w:"Between $1,035 and $12,615 (lower-middle, under $4,085)."},
+  {t:"Country C: GDP per capita $11,800",c:"Middle",w:"Just under the $12,615 line, so upper-middle income."},
+  {t:"Country D: GDP per capita $14,200",c:"High",w:"Above $12,616."},
+  {t:"Malawi in 2012: $250",c:"Low",w:"Less than $1 a day at market prices, from the reading."},
+  {t:"Mexico in 2012: $10,200",c:"Middle",w:"From the reading. Upper-middle income."},
+  {t:"United States in 2012: $51,000",c:"High",w:"Well above the high-income threshold."}
+]);
+mcq("act-gdpmcq",[
+  {q:"Why do we divide GDP by population?",o:["To convert it into U.S. dollars","So large and small countries can be compared fairly","To remove the effect of inflation","To measure inequality"],a:1,w:"Bigger countries produce more in total. Per capita tells us about the average person's living standard."},
+  {q:"PPP adjustments make the biggest difference for which countries?",o:["The richest countries","Countries with the most trade","The poorest countries, where local prices are lowest","Countries using the euro"],a:2,w:"Things like haircuts and rent are very cheap in poor countries, so Sachs notes PPP GDP can be three to four times higher than market GDP in a typical poor African country."},
+  {q:"Ireland's GDP per capita is much higher than its GNI per capita. The best explanation is:",o:["Irish citizens send lots of money home from abroad","Foreign corporations produce in Ireland but send their profits out","Ireland has very high prices","Ireland's population is shrinking"],a:1,w:"GDP counts production inside the borders. GNI subtracts the profits that foreign owners take out."},
+  {q:"Remittances (money sent home by family working abroad) are counted in:",o:["GDP but not GNI","GNI but not GDP","Both equally","Neither"],a:1,w:"They are income earned by citizens outside the country, so they add to GNI but weren't produced domestically."}
+]);
+
+/* ---------- Station 2 ---------- */
+function drCurve(x){ return 2.4 + 1.05*Math.log(x/1000); }
+function dr(){
+  const inc=+$("#drInc").value; $("#drIncV").textContent=fmt$(inc);
+  const W=640,H=280,L=48,R=16,T=16,B=40, xmax=150000, ymin=2, ymax=8;
+  const X=v=>L+(v/xmax)*(W-L-R), Y=v=>T+(1-(v-ymin)/(ymax-ymin))*(H-T-B);
+  let d=""; for(let v=2000; v<=xmax; v+=1000){ d+=(v===2000?"M":"L")+X(v).toFixed(1)+","+Y(drCurve(v)).toFixed(1); }
+  let g="";
+  for(let t=2;t<=8;t+=2){ g+=`<line x1="${L}" x2="${W-R}" y1="${Y(t)}" y2="${Y(t)}" stroke="${css("--line")}"/><text x="${L-8}" y="${Y(t)+4}" text-anchor="end" font-size="12" class="mut">${t}</text>`; }
+  for(let t=0;t<=150000;t+=50000){ g+=`<text x="${X(t)}" y="${H-B+18}" text-anchor="middle" font-size="12" class="mut">${t?("$"+t/1000+"k"):"$0"}</text>`; }
+  g+=`<rect x="${X(80000)}" y="${T}" width="${X(100000)-X(80000)}" height="${H-T-B}" fill="${css("--gold")}" opacity=".15"/><text x="${X(90000)}" y="${T+14}" text-anchor="middle" font-size="12" class="mut">$80k to $100k</text>`;
+  g+=`<text x="${L}" y="${H-4}" font-size="12" class="mut">Household income</text><text x="12" y="${T+8}" font-size="12" class="mut" transform="rotate(-90 12 ${T+8})" text-anchor="end">Life satisfaction (0 to 10)</text>`;
+  g+=`<path d="${d}" fill="none" stroke="${css("--accent")}" stroke-width="3"/>`;
+  const y1=drCurve(inc), y2=drCurve(inc+1000);
+  g+=`<line x1="${X(inc)}" x2="${X(inc)}" y1="${Y(y1)}" y2="${H-B}" stroke="${css("--gold")}" stroke-dasharray="4 4"/><circle cx="${X(inc)}" cy="${Y(y1)}" r="7" fill="${css("--gold")}" stroke="${css("--surface")}" stroke-width="2"/>`;
+  $("#drSvg").innerHTML=g;
+  const gain=y2-y1, base=drCurve(3000)-drCurve(2000);
+  $("#drOut").innerHTML=`At ${fmt$(inc)}, an extra $1,000 adds about <strong>${gain.toFixed(3)}</strong> ladder points.<br>At $2,000, that same $1,000 adds about ${base.toFixed(3)}. That's <strong>${Math.round(base/gain)}×</strong> more life satisfaction from the same money.`;
+}
+$("#drInc").oninput=dr; dr();
+
+sorter("act-gdpcount",["Raises GDP","Doesn't count"],[
+  {t:"Paying a lawyer for a long, messy divorce",c:"Raises GDP",w:"A paid service, so GDP goes up even though nobody is better off."},
+  {t:"Cooking dinner at home and eating together as a family",c:"Doesn't count",w:"Unpaid household work isn't a market transaction."},
+  {t:"Buying a new car after yours was totalled in a crash",c:"Raises GDP",w:"Repairs, tows and new cars all count. GDP can't tell good spending from bad."},
+  {t:"Volunteering at a food bank on Saturday",c:"Doesn't count",w:"No money changes hands, so it's invisible to GDP, even though it helps people."},
+  {t:"Hospital treatment for a serious illness",c:"Raises GDP",w:"Health care spending counts, so more illness can mean more GDP."},
+  {t:"Taking a walk after dinner and talking with your kids",c:"Doesn't count",w:"Exactly the kind of family life the reading says GDP treats as worthless."},
+  {t:"Reselling a house you bought ten years ago",c:"Doesn't count",w:"Sachs explains GDP measures new output, not trade in things that already exist."}
+]);
+shortAns("act-gdpshort",{
+  prompt:"Robert Kennedy said GDP measures everything \"except that which makes life worthwhile.\" Explain what he meant, and describe one situation where focusing on GDP growth still makes sense.",
+  ideas:[["Counts market transactions only",["market","transaction","money","spend","bought","buy"]],["Ignores unpaid / non-market things",["unpaid","volunteer","family","relationship","home","leisure","free time"]],["Counts harmful spending",["crash","divorce","illness","disease","pollution","harm","bad","prozac","cancer"]],["Diminishing returns",["diminishing","extra dollar","less and less","flatten","levels off"]],["GDP useful for poor countries",["poor","poverty","basic needs","low-income","developing","clean water","food"]]],
+  model:"GDP only counts market activity, so it adds up everything people spend money on, even when that spending comes from something bad like a car crash, an illness or a divorce. Meanwhile it ignores unpaid things that make life good, like family time, volunteering and friendship. So a country can grow its GDP without its people being any happier or healthier. Focusing on GDP growth still makes sense for very poor countries, where extra income pays for food, clean water, clinics and schools. Because of diminishing returns, an extra dollar matters hugely there and very little in a rich country."
+});
+
+/* ---------- Station 3: HDI ---------- */
+const hp=$("#hdiPreset");
+HDR.forEach((d,i)=>hp.appendChild(el("option",{value:i},`${d.c} (rank ${d.rank})`)));
+hp.appendChild(el("option",{value:"custom"},"Custom (move the sliders)"));
+function hdiCalc(le,mys,eys,gni){
+  const H=Math.min(1,Math.max(0,(le-20)/65));
+  const E=(Math.min(1,mys/15)+Math.min(1,eys/18))/2;
+  const I=Math.min(1,Math.max(0,(Math.log(gni)-Math.log(100))/(Math.log(75000)-Math.log(100))));
+  return {H,E,I,hdi:Math.cbrt(H*E*I)};
+}
+function hdi(){
+  const le=+$("#hLE").value, mys=+$("#hMYS").value, eys=+$("#hEYS").value, gni=Math.exp(+$("#hGNI").value);
+  $("#hLEv").textContent=le.toFixed(1); $("#hMYSv").textContent=mys.toFixed(1); $("#hEYSv").textContent=eys.toFixed(1); $("#hGNIv").textContent=fmt$(gni);
+  const r=hdiCalc(le,mys,eys,gni);
+  $("#hdiBars").innerHTML=bar("Health",r.H,1,r.H.toFixed(3),"var(--c1)")+bar("Education",r.E,1,r.E.toFixed(3),"var(--c3)")+bar("Income",r.I,1,r.I.toFixed(3),"var(--c2)");
+  $("#hdiBig").textContent=r.hdi.toFixed(3);
+  const v=hp.value; let txt=`Category: <strong>${hdiTier(r.hdi)}</strong> human development.`;
+  if(v!=="custom"){ txt+=`<br>Official HDI for ${HDR[v].c}: <strong>${HDR[v].hdi.toFixed(3)}</strong>.`; }
+  if(gni>75000) txt+=`<br>Income is above $75,000, so the income index is capped at 1. More money adds nothing here.`;
+  const lo=Math.min(r.H,r.E,r.I); const which=lo===r.H?"health":lo===r.E?"education":"income";
+  txt+=`<br>The weakest dimension is <strong>${which}</strong>. Because HDI uses a geometric mean, a weak spot drags the score down more than a simple average would.`;
+  $("#hdiOut").innerHTML=txt;
+}
+function hdiLoad(){ const v=hp.value; if(v==="custom") return hdi(); const d=HDR[v]; $("#hLE").value=d.le; $("#hMYS").value=d.mys; $("#hEYS").value=d.eys; $("#hGNI").value=Math.log(d.gni); hdi(); }
+hp.value=2; hp.onchange=hdiLoad; ["hLE","hMYS","hEYS","hGNI"].forEach(x=>$("#"+x).oninput=()=>{ hp.value="custom"; hdi(); }); hdiLoad();
+
+function slope(){
+  const data=[["United Kingdom",23,14],["New Zealand",21,7],["Slovenia",34,25],["South Korea",30,15],["Qatar",3,31],["Kuwait",17,46],["Equatorial Guinea",41,144],["Gabon",60,112]];
+  const W=640,H=380,T=40,B=24, x1=190, x2=450, max=150;
+  const Y=v=>T+(v/max)*(H-T-B);
+  let g=`<text x="${x1}" y="22" text-anchor="middle" font-weight="700" font-size="13">GDP per capita rank</text><text x="${x2}" y="22" text-anchor="middle" font-weight="700" font-size="13">HDI rank</text>`;
+  g+=`<line x1="${x1}" x2="${x1}" y1="${T}" y2="${H-B}" stroke="${css("--line")}"/><line x1="${x2}" x2="${x2}" y1="${T}" y2="${H-B}" stroke="${css("--line")}"/>`;
+  [1,50,100,150].forEach(t=>{ g+=`<text x="${(x1+x2)/2}" y="${Y(t)+4}" text-anchor="middle" font-size="11" class="mut">${t}</text>`; });
+  // label positions avoid overlap
+  const place=(arr)=>{ const s=arr.slice().sort((a,b)=>a.y-b.y); for(let i=1;i<s.length;i++){ if(s[i].y-s[i-1].y<14) s[i].y=s[i-1].y+14; } return arr; };
+  const L=place(data.map(d=>({y:Y(d[1]),d}))), R=place(data.map(d=>({y:Y(d[2]),d})));
+  data.forEach((d,i)=>{
+    const better=d[2]<d[1]; const col=better?css("--c1"):css("--c4");
+    g+=`<line x1="${x1}" y1="${Y(d[1])}" x2="${x2}" y2="${Y(d[2])}" stroke="${col}" stroke-width="2.5"/>`;
+    g+=`<circle cx="${x1}" cy="${Y(d[1])}" r="4" fill="${col}"/><circle cx="${x2}" cy="${Y(d[2])}" r="4" fill="${col}"/>`;
+    g+=`<text x="${x1-10}" y="${L[i].y+4}" text-anchor="end" font-size="12">${d[0]} · ${d[1]}</text>`;
+    g+=`<text x="${x2+10}" y="${R[i].y+4}" font-size="12">${d[2]} · ${d[0]}</text>`;
+  });
+  $("#slopeSvg").innerHTML=g;
+}
+slope();
+mcq("act-hdimcq",[
+  {q:"Which three dimensions make up the HDI?",o:["GDP, GNI and PPP","Health, education and standard of living","Happiness, freedom and generosity","Income, inequality and environment"],a:1,w:"Life expectancy, schooling (mean and expected years) and GNI per capita (PPP)."},
+  {q:"Qatar's GNI per capita is almost double Canada's, but its HDI is lower. The best explanation:",o:["Qatar's life expectancy is much lower","Qatar's schooling is lower, and income above $75,000 adds nothing to the HDI","Qatar's population is too small to count","The HDI ignores income completely"],a:1,w:"Qatar's mean years of schooling (10.8) and expected years (13.1) trail Canada's (13.9 and 15.9). Its life expectancy is actually similar."},
+  {q:"Why does the HDI use the logarithm of income?",o:["To make rich countries look better","Because of diminishing returns: each extra dollar matters less as income rises","Because income is hard to measure","To convert currencies"],a:1,w:"Using the log means going from $1,000 to $2,000 counts the same as going from $40,000 to $80,000."},
+  {q:"A country ranks 41st on GDP per capita but 144th on HDI. This most likely suggests:",o:["Its wealth isn't reaching most people's health and education","It has very low prices","It has a very equal distribution of income","It has too many university graduates"],a:0,w:"That's Equatorial Guinea. Oil wealth went to a few, a classic resource curse case."},
+  {q:"An HDI of 0.731 falls in which category?",o:["Very High","High","Medium","Low"],a:1,w:"High is 0.700 to 0.799. That's Botswana in the 2025 report."}
+]);
+
+/* ---------- Station 4 ---------- */
+matching("act-cursematch",[
+  ["Oil exports drive up the currency, so the country's farmers can no longer sell crops abroad at competitive prices.","Dutch Disease"],
+  ["The president's family and allies control the oil contracts and the courts never investigate.","Corruption & weak institutions"],
+  ["Armed groups fight for control of the mining regions in the east of the country.","Conflict"],
+  ["Oil revenue builds luxury towers in the capital while most rural families have no clean water.","Inequality"]
+]);
+sorter("act-cursesort",["Fell into the curse","Avoided the curse"],[
+  {t:"Nigeria: huge oil wealth, persistent poverty, corruption, conflict in the Niger Delta",c:"Fell into the curse",w:"Class example of oil hurting rather than helping."},
+  {t:"Norway: saves oil money in a giant public fund managed transparently",c:"Avoided the curse",w:"Strong institutions and saving for the future."},
+  {t:"Venezuela: economy collapsed after oil prices dropped and the economy was mismanaged",c:"Fell into the curse",w:"Over-reliance on one export plus poor management."},
+  {t:"Botswana: diamond wealth used for roads, schools and health care",c:"Avoided the curse",w:"Often called Africa's resource success story because of stable, accountable government."},
+  {t:"Democratic Republic of Congo: mineral wealth fuels armed conflict and weak governance",c:"Fell into the curse",w:"Conflict over resources is a key mechanism of the curse."},
+  {t:"Canada: oil, minerals and timber, with established democratic institutions and rule of law",c:"Avoided the curse",w:"Institutions were strong before the resource wealth arrived."}
+]);
+shortAns("act-curseshort",{
+  prompt:"Why do some resource-rich countries fall into the resource curse while others (like Norway or Botswana) don't? Use at least one example of each.",
+  ideas:[["Institutions / governance",["institution","govern","rule of law","democra","transparen","accountab"]],["Corruption / elite capture",["corrupt","elite","insider","few people","small group"]],["A cursed example",["nigeria","venezuela","congo","drc","equatorial guinea"]],["A success example",["norway","botswana","canada"]],["Sharing / investing the wealth",["invest","fund","save","school","health","share","public"]]],
+  model:"The difference mostly comes down to institutions. When a country discovers oil or minerals without strong, transparent government, the money tends to flow to a small elite, which fuels corruption, inequality and sometimes conflict over who controls it. Nigeria is the classic case: enormous oil wealth, yet persistent poverty and violence in the Niger Delta. Norway had a stable democracy and rule of law before its oil boom, so it saved the revenue in a public fund that benefits everyone. Botswana did something similar with diamonds, spending on schools and health care. Dutch Disease can still hurt other industries, but good governance turns resource wealth into development instead of a curse."
+});
+
+/* ---------- Station 5 ---------- */
+function lorenz(){
+  const k=+$("#lzK").value, G=(k-1)/(k+1);
+  $("#lzKv").textContent="k = "+k.toFixed(2);
+  const S0=320,P=30, X=p=>P+p*(S0-2*P), Y=v=>S0-P-v*(S0-2*P);
+  let pts=""; for(let i=0;i<=50;i++){ const p=i/50; pts+=(i?"L":"M")+X(p).toFixed(1)+","+Y(Math.pow(p,k)).toFixed(1); }
+  let g=`<rect x="${P}" y="${P}" width="${S0-2*P}" height="${S0-2*P}" fill="none" stroke="${css("--line")}"/>`;
+  g+=`<path d="${pts} Z" fill="${css("--gold")}" opacity=".3"/>`;
+  g+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(1)}" y2="${Y(1)}" stroke="${css("--muted")}" stroke-dasharray="5 4"/>`;
+  g+=`<path d="${pts}" fill="none" stroke="${css("--accent")}" stroke-width="3"/>`;
+  g+=`<text x="${X(.32)}" y="${Y(.42)}" font-size="11" class="mut" transform="rotate(-45 ${X(.32)} ${Y(.42)})">line of equality</text>`;
+  g+=`<text x="${S0/2}" y="${S0-6}" text-anchor="middle" font-size="11" class="mut">% of people (poorest to richest)</text>`;
+  g+=`<text x="10" y="${S0/2}" text-anchor="middle" font-size="11" class="mut" transform="rotate(-90 10 ${S0/2})">% of income</text>`;
+  $("#lzSvg").innerHTML=g;
+  $("#lzGini").textContent=G.toFixed(2);
+  const L=p=>Math.pow(p,k), q=[1,2,3,4,5].map(i=>L(i/5)-L((i-1)/5));
+  $("#lzQ").innerHTML=q.map((v,i)=>bar(["Poorest 20%","Second 20%","Middle 20%","Fourth 20%","Richest 20%"][i],v,.7,(v*100).toFixed(1)+"%",i===4?"var(--c4)":i===0?"var(--c3)":"var(--accent)")).join("");
+  const qr=q[4]/q[0];
+  const band=G<.25?"very equal, more equal than any real country":G<.35?"more equal, like Scandinavia or Canada":G<.45?"moderate inequality, like the United States":"high inequality, like Brazil or South Africa";
+  $("#lzOut").innerHTML=`Quintile ratio = ${(q[4]*100).toFixed(1)} ÷ ${(q[0]*100).toFixed(1)} = <strong>${qr<1.01?"1.0":qr.toFixed(1)}</strong><br>A Gini of ${G.toFixed(2)} is ${band}.`;
+}
+$("#lzK").oninput=lorenz; lorenz();
+
+const OECD=[["Iceland",.244],["Norway",.249],["Denmark",.252],["Finland",.260],["Sweden",.269],["Germany",.286],["France",.303],["Canada",.320],["United Kingdom",.341],["United States",.380],["Turkey",.411],["Mexico",.466],["Chile",.500]];
+$("#oecdBars").innerHTML=OECD.map(([c,v])=>bar(c,v,.55,v.toFixed(3),c==="Canada"?"var(--gold)":v>=.45?"var(--c4)":v>=.35?"var(--c3)":"var(--accent)")).join("");
+
+const SOCS=[
+  {n:"Society A: Equal",inc:[30,32,34,36,38]},
+  {n:"Society B: Unequal but richer",inc:[8,20,45,90,250]},
+  {n:"Society C: Middle ground",inc:[22,30,40,55,80]}
+];
+let socPick=null;
+const socBox=$("#socs");
+function gini(a){ const n=a.length, m=a.reduce((x,y)=>x+y,0)/n; let s=0; a.forEach(x=>a.forEach(y=>s+=Math.abs(x-y))); return s/(2*n*n*m); }
+SOCS.forEach((s,i)=>{
+  const mx=250; const avg=s.inc.reduce((a,b)=>a+b,0)/5;
+  const b=el("button",{class:"soc",type:"button"},`<b>${s.n}</b><div class="pp">${s.inc.map(v=>`<i style="height:${Math.max(3,v/mx*100)}%"></i>`).join("")}</div><span class="mono" style="font-size:13px">Incomes ($k): ${s.inc.join(", ")}<br>Average: $${avg.toFixed(0)}k · Gini ≈ ${gini(s.inc).toFixed(2)}</span>`);
+  b.onclick=()=>{ socPick=i; $$(".soc",socBox).forEach((x,j)=>x.classList.toggle("sel",j===i)); $("#veilBtn").disabled=false; $("#veilMsg").textContent="Ready when you are."; };
+  socBox.appendChild(b);
+});
+$("#veilBtn").onclick=()=>{
+  const s=SOCS[socPick], who=Math.floor(Math.random()*5), me=s.inc[who];
+  $$(".soc",socBox).forEach((x,j)=>{ $$(".pp i",x).forEach((bar,k)=>bar.classList.toggle("me", j===socPick && k===who)); });
+  const worst=s.inc[0];
+  const out=$("#veilOut"); out.hidden=false;
+  out.innerHTML=`You were born as person ${who+1} of 5 in ${s.n.split(":")[0]}, earning <strong>$${me}k</strong> a year.<br>`+
+   `The worst-off person here earns $${worst}k. In Society B, the worst-off earns only $8k. `+
+   `Rawls argued that people behind the veil would protect the worst-off position, but too little inequality can also remove the reward for effort and new ideas. Which risk would you rather take? Try again to see a different outcome.`;
+  $("#veilMsg").textContent="";
+};
+
+const IHDI=[["Canada",.939,.867],["United States",.938,.832],["Brazil",.786,.594],["Country D (from slides)",.717,.462]];
+const tb=$("#ihdiTbl tbody");
+IHDI.forEach(([c,h,i],k)=>{ const tr=el("tr",{},`<td>${c}</td><td class="num mono">${h.toFixed(3)}</td><td class="num mono">${i.toFixed(3)}</td><td class="num"><input type="number" step="0.1" id="ihdi${k}" aria-label="Loss for ${c}" style="width:90px"></td><td class="mono" id="ihdiR${k}"></td>`); tb.appendChild(tr); });
+reg("ihdi-calc",$("#ihdiTbl"));
+$("#ihdiCheck").onclick=()=>{
+  let n=0, filled=0;
+  IHDI.forEach(([c,h,i],k)=>{ const v=parseFloat($("#ihdi"+k).value); const ans=(h-i)/h*100; const cell=$("#ihdiR"+k);
+    if(isNaN(v)){ cell.textContent=""; return; } filled++;
+    const ok=Math.abs(v-ans)<=0.6; if(ok)n++;
+    cell.innerHTML=ok?`<span style="color:var(--good)">✓ ${ans.toFixed(1)}%</span>`:`<span style="color:var(--bad)">✗ ${ans.toFixed(1)}%</span>`; });
+  if(filled<IHDI.length){ $("#ihdiMsg").textContent="Fill in all four first."; return; }
+  $("#ihdiMsg").textContent=`${n} / 4 correct. Notice how the most unequal country loses more than a third of its human development.`;
+  record("ihdi-calc",n,4);
+};
+mcq("act-ineqmcq",[
+  {q:"Which Gini coefficient shows the MOST equal society?",o:["0.50","0.38","0.25","0.45"],a:2,w:"Lower is more equal. Scandinavian countries sit around 0.25."},
+  {q:"A quintile ratio of 12 means:",o:["The richest 20% earn 12 times what the poorest 20% earn","12% of people are poor","The Gini is 0.12","The top 1% earn 12% of income"],a:0,w:"It's the average income of the richest fifth divided by the poorest fifth."},
+  {q:"Which is a limitation of the Gini coefficient?",o:["It can only be calculated for rich countries","It measures income, not wealth, and hides regional differences","It measures happiness instead of income","It always rises when GDP rises"],a:1,w:"From the slides: the Gini doesn't capture wealth (like property and savings), regional gaps, or social mobility."},
+  {q:"A country's HDI is 0.786 but its IHDI is 0.594. What does the gap tell you?",o:["Its environment is damaged","It loses about a quarter of its human development to inequality","Its GDP is lower than its GNI","It is a least-developed country"],a:1,w:"(0.786 − 0.594) ÷ 0.786 ≈ 24.4%. That's Brazil."},
+  {q:"Rawls's veil of ignorance asks you to design a society:",o:["Where you know you'll be the richest person","Without knowing what position you'll be born into","That maximizes GDP","With zero inequality"],a:1,w:"Because you can't rig the rules for yourself, Rawls thought you'd choose rules that are fair to everyone, especially the worst-off."},
+  {q:"Sachs says governments can be \"great equalizers\" mainly by:",o:["Banning high incomes","Ensuring widespread access to education and health care","Exporting more natural resources","Raising GDP as fast as possible"],a:1,w:"Scandinavian countries support poor families so all children get a real chance, which keeps inequality low and prosperity high."}
+]);
+shortAns("act-ineqshort",{
+  prompt:"Does inequality always have to be \"bad\"? At what point does it become a problem for a country's wellbeing? Use at least one measure of inequality in your answer.",
+  ideas:[["Uses a measure (Gini, quintile, top 1%, IHDI)",["gini","quintile","1%","top 1","ihdi","lorenz"]],["Some inequality can reward effort",["incentive","reward","effort","motivat","innovat","work hard"]],["Consequences (health, education, trust)",["trust","health","education","crime","mobility","opportunit"]],["Fairness / veil of ignorance",["rawls","veil","fair","worst-off","worst off"]],["Example country",["brazil","canada","finland","united states","u.s.","norway","sweden","denmark","chile","mexico"]]],
+  model:"Some inequality isn't necessarily bad, since differences in income can reward effort, skill and new ideas. Too little inequality can weaken that incentive. It becomes a problem when it limits opportunity and trust. When the Gini climbs above about 0.45, or the richest 1% hold a huge share of income like Brazil's 28.4% compared with Finland's 7.3%, the poor often can't access good education or health care, social mobility drops, and people stop trusting government. Brazil's HDI falls by about 24% once inequality is accounted for in the IHDI. Using Rawls's veil of ignorance, I'd choose a society like Canada or Finland with moderate inequality, because I wouldn't want to risk being born into the bottom."
+});
+
+/* ---------- Station 6 ---------- */
+function nir(){
+  const b=+$("#nCBR").value, d=+$("#nCDR").value, r=(b-d)/10;
+  $("#nCBRv").textContent=b; $("#nCDRv").textContent=d;
+  $("#nirOut").innerHTML=`NIR = (${b} − ${d}) ÷ 10 = <strong>${r.toFixed(1)}%</strong> per year<br>`+
+   (r>0?`At this rate the population doubles in about <strong>${(70/r).toFixed(0)} years</strong> (rule of 70). `:r<0?`The population is <strong>shrinking</strong> naturally, like Japan or Italy today. `:`Births and deaths balance out. `)+
+   (b>=30?"A birth rate this high is typical of a mostly rural, lower-income country.":b<=12?"A birth rate this low is typical of a wealthy, urban, aging country.":"");
+}
+["nCBR","nCDR"].forEach(x=>$("#"+x).oninput=nir); nir();
+sorter("act-indexsort",["HDI","Gender Inequality Index","Planetary pressures (PHDI)"],[
+  {t:"Life expectancy at birth",c:"HDI",w:"The health dimension."},
+  {t:"Mean years of schooling",c:"HDI",w:"Part of the education dimension."},
+  {t:"Adolescent birth rate",c:"Gender Inequality Index",w:"Reproductive health dimension of the GII."},
+  {t:"Share of seats in parliament held by women",c:"Gender Inequality Index",w:"Empowerment dimension."},
+  {t:"Labour force participation, women vs men",c:"Gender Inequality Index",w:"Labour market dimension."},
+  {t:"Carbon dioxide emissions per capita",c:"Planetary pressures (PHDI)",w:"Adjusts HDI for environmental pressure."},
+  {t:"Material footprint per capita",c:"Planetary pressures (PHDI)",w:"How much raw material each person's consumption uses."},
+  {t:"GNI per capita (PPP)",c:"HDI",w:"The standard of living dimension."}
+]);
+mcq("act-peoplemcq",[
+  {q:"A country has a crude birth rate of 38 and a crude death rate of 8. Its natural increase rate is:",o:["30%","3.0%","4.6%","0.3%"],a:1,w:"(38 − 8) ÷ 10 = 3.0%. Remember to divide by 10 since the rates are per 1,000."},
+  {q:"According to Sachs, why do rural families tend to have more children?",o:["Rural areas have better hospitals","Children help with farm work, and child survival and access to family planning are lower","Rural governments pay families to have children","Urban families earn less"],a:1,w:"In cities children are 'expensive' because they go to school, mothers tend to have more education, and contraception is easier to get."},
+  {q:"Why would a very rich country like the U.S. drop in rank on the PHDI?",o:["Its schooling is low","Its high CO₂ emissions and material use per person","Its life expectancy is the lowest in the world","It has too few women in parliament"],a:1,w:"The PHDI discounts development that puts heavy pressure on the planet."},
+  {q:"When you notice a sudden change in a country's trend graph, the most important next step is to:",o:["Ignore it as a data error","Ask what happened in that country to cause it","Average it with other years","Compare it only to Canada"],a:1,w:"Trends are clues. The 'why' (a war, a new government, a disease outbreak) is what gives you the full picture."}
+]);
+
+/* ---------- Station 7 ---------- */
+const lad=$("#ladder");
+for(let r=0;r<=10;r++){ const row=el("div",{class:"rung"},`<span>${r}</span>`); const b=el("button",{type:"button","aria-label":"Rung "+r}); b.dataset.r=r; row.appendChild(b); lad.appendChild(row); }
+function drawLadder(){
+  $$(".rung button",lad).forEach(b=>{ const r=+b.dataset.r; b.classList.toggle("now",S.ladder.now===r); b.classList.toggle("fut",S.ladder.fut===r); b.textContent=(S.ladder.now===r?"Now ":"")+(S.ladder.fut===r?"In 5 years":""); });
+  const o=$("#ladderOut");
+  if(S.ladder.now==null) o.innerHTML="Click a rung for \"now.\"";
+  else if(S.ladder.fut==null) o.innerHTML=`Now: <strong>${S.ladder.now}</strong>. Click a rung for five years from now.`;
+  else { const d=S.ladder.fut-S.ladder.now; o.innerHTML=`Now: <strong>${S.ladder.now}</strong> · In 5 years: <strong>${S.ladder.fut}</strong><br>${d>0?"You're optimistic. Gallup tracks this 'ladder-future' question too, and expecting your life to improve is linked to higher wellbeing.":d<0?"You expect things to get harder. That's worth noticing. Researchers watch this gap closely.":"You expect things to stay about the same."}<br>Click any rung to start over.`; }
+}
+lad.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const r=+b.dataset.r;
+  if(S.ladder.now==null || S.ladder.fut!=null){ S.ladder={now:r}; } else S.ladder.fut=r; save(); drawLadder(); });
+drawLadder();
+const WHR=[["Finland",7.74],["Costa Rica",6.99],["Norway",7.26],["Canada",6.80],["United States",6.72],["Afghanistan",1.36]].sort((a,b)=>b[1]-a[1]);
+$("#whrBars").innerHTML=WHR.map(([c,v])=>bar(c,v,10,v.toFixed(2),c==="Canada"?"var(--gold)":"var(--accent)")).join("");
+sorter("act-affsort",["Affective","Evaluative"],[
+  {t:"\"Did you smile or laugh a lot yesterday?\"",c:"Affective",w:"About recent emotion."},
+  {t:"\"On a ladder from 0 to 10, where does your life stand?\"",c:"Evaluative",w:"The Cantril ladder judges life as a whole."},
+  {t:"\"Did you feel worried for much of yesterday?\"",c:"Affective",w:"Recent emotional state."},
+  {t:"\"All things considered, how satisfied are you with your life?\"",c:"Evaluative",w:"Overall life satisfaction."},
+  {t:"Aristotle's idea of eudaimonia, flourishing over a whole life",c:"Evaluative",w:"It's about living well overall, not a passing mood."}
+]);
+matching("act-whrmatch",[
+  ["Social support","Having someone to count on in times of trouble"],
+  ["Freedom to make life choices","Feeling you control the direction of your own life"],
+  ["Generosity","Recently donating money to charity"],
+  ["Perceptions of corruption","How much people believe government and business are corrupt"],
+  ["Healthy life expectancy","How many years people live in good health"],
+  ["GDP per capita","Average economic output per person"]
+]);
+shortAns("act-happyshort",{
+  prompt:"Costa Rica has less than half the GNI per capita of the United States but ranks higher on the World Happiness Report. Using the WHR variables and the reading, explain how this is possible.",
+  ideas:[["Income isn't everything / diminishing returns",["diminishing","not everything","only one","income alone","money isn't","money doesn't"]],["Social support / relationships",["social support","social capital","friend","family","relationship","community"]],["Trust / corruption",["trust","corrupt"]],["Health / life expectancy",["health","life expectancy","live longer"]],["Values / materialism",["material","generos","values","consum"]]],
+  model:"GDP per capita is only one of six variables in the World Happiness Report, and because of diminishing returns, extra income adds less and less once basic needs are met. Costa Rica scores well on the other variables. Strong family and community ties give people social support, and its life expectancy (80.8 years) is actually higher than the U.S. (79.3). Sachs argues that social capital, trust and less materialistic values matter a lot for life satisfaction, and that intensely materialistic people report being less satisfied. So a country can be less wealthy but still have people who evaluate their lives more positively."
+});
+
+/* ---------- Station 8 ---------- */
+const CV={1980:{China:2,Niger:4},2010:{China:20,Niger:1.8}};
+function conv(y){
+  $("#cv1980").className="btn"+(y===1980?"":" ghost"); $("#cv2010").className="btn"+(y===2010?"":" ghost");
+  const d=CV[y];
+  $("#cvBars").innerHTML=bar("China",d.China,25,d.China+"%","var(--c4)")+bar("Niger",d.Niger,25,(y===2010?"<2%":d.Niger+"%"),"var(--c3)");
+  $("#cvOut").innerHTML=y===1980?"In 1980, China was at about $250 per person and Niger at about $450. Niger was actually ahead.":
+    "By 2010, China reached nearly $10,000 per person after three decades of double-digit growth: <strong>convergence</strong>. Niger, landlocked and stuck in a poverty trap, fell further behind: <strong>divergence</strong>.";
+}
+$("#cv1980").onclick=()=>conv(1980); $("#cv2010").onclick=()=>conv(2010); conv(1980);
+function r70(){ const r=+$("#r70").value; $("#r70v").textContent=r+"%"; const t=70/r;
+  $("#r70Out").innerHTML=`70 ÷ ${r} = <strong>${t.toFixed(1)} years</strong> to double.<br>${r>=5?`A city of 5 million growing ${r}% a year becomes 10 million in about ${t.toFixed(0)} years.`:`At ${r}%, a generation could pass before the economy doubles.`}`; }
+$("#r70").oninput=r70; r70();
+mcq("act-gapmcq",[
+  {q:"\"Convergence\" means:",o:["Rich countries get richer faster than poor ones","Poor countries narrow the proportional gap with rich countries","All countries adopt the same currency","Rural and urban populations become equal in size"],a:1,w:"China since 1978 is the textbook example."},
+  {q:"Why are so many least-developed countries landlocked?",o:["Landlocked countries have no natural resources","Trade, which drives development, is harder and costlier without a coastline","The UN only lists landlocked countries","Landlocked countries have larger populations"],a:1,w:"Switzerland and Austria show it isn't destiny, but it's a big hurdle when your neighbours are poor too."},
+  {q:"Which period does Sachs describe as mainly one of divergence?",o:["1950 to today","About 1750 to 1950","Before 1750","Only the 2008 financial crisis"],a:1,w:"The Industrial Revolution helped a few countries, and imperialism held colonies back."},
+  {q:"An urban area growing 7% a year will double in about:",o:["7 years","10 years","70 years","49 years"],a:1,w:"70 ÷ 7 = 10."}
+]);
+
+/* ---------- Station 9 ---------- */
+const sa=$("#cmpA"), sb=$("#cmpB");
+HDR.forEach((d,i)=>{ sa.appendChild(el("option",{value:i},d.c)); sb.appendChild(el("option",{value:i},d.c)); });
+sa.value=2; sb.value=6;
+function cmp(){
+  const A=HDR[sa.value], B=HDR[sb.value];
+  const rows=[["HDI (rank "+A.rank+" vs "+B.rank+")","hdi",1,v=>v.toFixed(3)],["Life expectancy (years)","le",90,v=>v.toFixed(1)],["Expected years of schooling","eys",20,v=>v.toFixed(1)],["Mean years of schooling","mys",15,v=>v.toFixed(1)],["GNI per capita (PPP $)","gni",115000,v=>fmt$(v)]];
+  $("#cmpOut").innerHTML=rows.map(([lab,k,mx,f])=>`<div><div class="score" style="margin-bottom:4px">${lab}</div><div class="bars">${bar(A.c,A[k],mx,f(A[k]),"var(--c1)")}${bar(B.c,B[k],mx,f(B[k]),"var(--c2)")}</div></div>`).join("")+
+   `<div class="readout">${A.c}: <strong>${hdiTier(A.hdi)}</strong> human development · ${B.c}: <strong>${hdiTier(B.hdi)}</strong><br>${insight(A,B)}</div>`;
+  scatter(A,B);
+}
+function insight(A,B){
+  const richer=A.gni>B.gni?A:B, poorer=richer===A?B:A;
+  const out=[]; const ratio=richer.gni/poorer.gni;
+  out.push(`${richer.c} has ${ratio.toFixed(1)}× the income per person of ${poorer.c}.`);
+  if(poorer.le>richer.le) out.push(`Yet people in ${poorer.c} live ${(poorer.le-richer.le).toFixed(1)} years longer. Money isn't the whole story.`);
+  if(poorer.hdi>richer.hdi) out.push(`And ${poorer.c} actually has the higher HDI.`);
+  if(richer.mys<poorer.mys) out.push(`Adults in ${poorer.c} have more schooling on average.`);
+  return out.join(" ");
+}
+function scatter(A,B){
+  const W=660,H=380,L=56,R=20,T=16,B2=46, lx0=Math.log10(1000), lx1=Math.log10(150000);
+  const X=v=>L+(Math.log10(v)-lx0)/(lx1-lx0)*(W-L-R), Y=v=>T+(1-(v-.35)/(1-.35))*(H-T-B2);
+  let g="";
+  [.4,.55,.7,.8,1].forEach(t=>{ g+=`<line x1="${L}" x2="${W-R}" y1="${Y(t)}" y2="${Y(t)}" stroke="${css("--line")}"/><text x="${L-8}" y="${Y(t)+4}" text-anchor="end" font-size="11" class="mut">${t.toFixed(2)}</text>`; });
+  [["Very High",.9],["High",.75],["Medium",.625],["Low",.45]].forEach(([n,v])=>{ g+=`<text x="${W-R-4}" y="${Y(v)+4}" text-anchor="end" font-size="10" class="mut">${n}</text>`; });
+  [1000,10000,100000].forEach(t=>{ g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${T}" y2="${H-B2}" stroke="${css("--line")}"/><text x="${X(t)}" y="${H-B2+16}" text-anchor="middle" font-size="11" class="mut">$${t.toLocaleString("en-CA")}</text>`; });
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle" font-size="12" class="mut">GNI per capita, PPP (log scale)</text><text x="14" y="${(T+H-B2)/2}" text-anchor="middle" font-size="12" class="mut" transform="rotate(-90 14 ${(T+H-B2)/2})">HDI</text>`;
+  HDR.forEach(d=>{ const sel=d===A||d===B; const col=d===A?css("--c1"):d===B?css("--c2"):css("--muted");
+    g+=`<circle cx="${X(d.gni)}" cy="${Y(d.hdi)}" r="${sel?8:5}" fill="${col}" opacity="${sel?1:.55}" stroke="${css("--surface")}" stroke-width="1.5"><title>${d.c}: GNI ${fmt$(d.gni)}, HDI ${d.hdi}</title></circle>`;
+    if(sel) g+=`<text x="${X(d.gni)+(d.gni>60000?-12:12)}" y="${Y(d.hdi)+4}" text-anchor="${d.gni>60000?"end":"start"}" font-size="12" font-weight="700">${d.c}</text>`;
+  });
+  $("#scatter").innerHTML=g;
+}
+sa.onchange=cmp; sb.onchange=cmp; cmp();
+mcq("act-detective",[
+  {q:"Compare Costa Rica and the United States. Which statement is true?",o:["The U.S. has higher income AND longer life expectancy","Costa Rica has less than a third of U.S. income but longer life expectancy","Costa Rica has more years of schooling","Their HDI scores are identical"],a:1,w:"Costa Rica: $23,417 and 80.8 years. U.S.: $73,650 and 79.3 years."},
+  {q:"Compare Equatorial Guinea and India. What does the data show?",o:["Equatorial Guinea has higher income per person but a lower HDI","India has higher income and higher HDI","They are equal on every measure","Equatorial Guinea has longer life expectancy"],a:0,w:"Equatorial Guinea's GNI is $12,762 vs India's $9,047, but its HDI is 0.674 vs 0.685. The resource curse at work."},
+  {q:"Compare Botswana and India. Botswana is richer, but India does better on:",o:["Mean years of schooling","Life expectancy","GNI per capita","HDI"],a:1,w:"India 72.0 years vs Botswana 69.2. Botswana's HDI is still higher, mostly from income and schooling."},
+  {q:"Compare Afghanistan and Niger. Which dimension shows the biggest problem for both?",o:["Life expectancy is above 80","Mean years of schooling is extremely low (2.5 and 1.4 years)","Both are high-income countries","Both have more schooling than Canada"],a:1,w:"Adults average under three years of schooling in both. Education is the weakest link."},
+  {q:"Looking at the scatter plot, what pattern do you see?",o:["No relationship between income and HDI","HDI rises with income, but flattens at high incomes","HDI falls as income rises","Only income matters for HDI"],a:1,w:"Richer usually means higher HDI, but the curve flattens. That's diminishing returns again."}
+]);
+
+/* ---------- Station 10 ---------- */
+mcq("act-finalmcq",[
+  {q:"Which indicator would best show whether a country's oil wealth is reaching ordinary people?",o:["GDP per capita","Comparing GDP rank with HDI rank (or HDI with IHDI)","Total GDP","Exchange rate"],a:1,w:"A big gap between income rank and HDI rank, or a big HDI to IHDI loss, shows wealth isn't spreading."},
+  {q:"Two countries both have an average income of $40,000. Country X has a Gini of 0.26, Country Y 0.48. Which is most likely true?",o:["Their people live identical lives","Country Y's poorest households are much worse off","Country X has a higher GDP","Country Y has more equal income"],a:1,w:"Same average, very different distribution. Feet in the fire, head on ice."},
+  {q:"Which measure is a form of evaluative wellbeing?",o:["Number of times you laughed yesterday","The Cantril ladder","Crude birth rate","Material footprint"],a:1,w:"It asks you to judge your life as a whole."},
+  {q:"\"Dutch Disease\" refers to:",o:["A health crisis caused by mining","Resource exports raising the currency and hurting other export industries","Corruption in the Netherlands","Rapid urbanization"],a:1,w:"Named after the Netherlands' experience after discovering natural gas."},
+  {q:"Which change would RAISE a country's GDP but probably LOWER wellbeing?",o:["More volunteering","A rise in car crashes and repair spending","More family meals at home","More free time"],a:1,w:"GDP counts the spending but not the suffering."},
+  {q:"A country's crude birth rate is 12 and crude death rate is 14. What's happening?",o:["Population growing 2%","Natural decrease of 0.2% per year","Population growing 0.2%","Population doubling every 35 years"],a:1,w:"(12 − 14) ÷ 10 = −0.2%."},
+  {q:"Why might two countries with similar HDI rank very differently on the PHDI?",o:["One has much higher CO₂ emissions and material use per person","One has a different currency","The PHDI ignores life expectancy","One has more women in parliament"],a:0,w:"The PHDI adjusts for planetary pressures."},
+  {q:"Sachs's three pillars of sustainable development, supported by good governance, are:",o:["GDP, GNI and PPP","Economic development, social inclusion and environmental sustainability","Health, education and income","Happiness, freedom and generosity"],a:1,w:"The opening line of Chapter 2."}
+]);
+shortAns("act-final1",{
+  prompt:"You're advising a new government that wants to measure its country's success. Recommend THREE indicators (not just GDP) and explain why each one adds something the others miss.",
+  ideas:[["Uses HDI or its parts",["hdi","human development","life expectancy","schooling","education"]],["An inequality measure",["gini","quintile","ihdi","1%","inequality"]],["Happiness / subjective wellbeing",["happiness","cantril","ladder","life satisfaction","world happiness"]],["Environment (PHDI, CO₂, footprint)",["phdi","co2","carbon","emission","footprint","environment","planet"]],["Explains a limitation of GDP",["gdp","market","doesn't count","ignores","average"]],["Gender / demographic indicator",["gender","gii","women","birth rate","parliament"]]],
+  model:"First, I'd use the HDI because it adds health and education to income, so a country can't look successful just because its GDP is high (Equatorial Guinea ranked 41st on income but 144th on HDI). Second, I'd track inequality using the Gini coefficient or the IHDI, because averages hide how income is shared; Brazil loses about 24% of its HDI to inequality. Third, I'd add a happiness measure like the Cantril ladder, since it asks people directly how their lives are going and captures things like social support, trust and freedom that no economic statistic sees. I might also add the PHDI, because development that destroys the environment won't last."
+});
+shortAns("act-final2",{
+  prompt:"Using specific examples from the unit, explain why a country's GDP per capita can give a misleading picture of its people's wellbeing.",
+  ideas:[["Average hides inequality",["average","inequality","gini","distribut","feet","fire"]],["GDP vs GNI (Ireland)",["ireland","gni","foreign","profit"]],["Rich but low HDI (Eq. Guinea / Qatar)",["equatorial","guinea","qatar","kuwait","gabon","hdi"]],["Counts harmful spending, ignores unpaid",["crash","divorce","volunteer","unpaid","family","illness"]],["Diminishing returns / happiness",["diminishing","happiness","costa rica","life satisfaction","cantril"]],["Cost of living / PPP",["ppp","purchasing","cost of living","prices"]]],
+  model:"GDP per capita is an average, so it hides how income is distributed. Brazil and Finland could have similar averages but Brazil's top 1% take 28.4% of income versus 7.3% in Finland. It also measures production, not what people receive; Ireland's GDP is inflated by foreign companies whose profits leave, so GNI is lower. High income doesn't guarantee health and education either: Equatorial Guinea ranked 41st on income but 144th on HDI because oil wealth stayed with an elite. GDP also counts harmful spending like car crashes and divorces while ignoring unpaid family time and volunteering. Finally, because of diminishing returns, extra income adds little happiness in rich countries, which is why Costa Rica can be happier than the much richer U.S."
+});
+function renderSummary(){
+  if(S.rank) $("#rankEcho").innerHTML=S.rank.map((t,i)=>`${i+1}. ${t}`).join("<br>");
+  const keys=Object.keys(ACTS), done=keys.filter(k=>S.results[k]);
+  let sc=0,mx=0; done.forEach(k=>{ sc+=S.results[k].score; mx+=S.results[k].max; });
+  const missing=[...new Set(keys.filter(k=>!S.results[k]).map(k=>$("#tab-"+ACTS[k]).textContent.replace(/^\d+|✓/,"").trim()))];
+  $("#summary").innerHTML=`<h4>Your review so far</h4><p>You've finished <b>${done.length} of ${keys.length}</b> activities and earned <b>${sc} of ${mx}</b> possible points on the ones you've done.</p>`+
+   (missing.length?`<p>Still to finish: ${missing.join(", ")}.</p>`:`<p>You've completed every station. Go back over anything you missed, and use Study Buddy's "quiz me" for extra practice.</p>`);
+}
+$("#resetAll").onclick=function(){
+  if(this.dataset.confirm!=="1"){ this.dataset.confirm="1"; this.textContent="Tap again to confirm reset"; $("#resetMsg").textContent="This clears all your answers in this browser."; return; }
+  try{ Object.keys(localStorage).filter(k=>k.startsWith(KEY)).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  location.hash="start"; location.reload();
+};
+
+/* ---------- Study Buddy (offline, rule-based) ---------- */
+const KB=[
+  {k:["gdp per capita","per capita","per person"],a:"<b>GDP per capita</b> is a country's GDP divided by its population, so it shows average economic output per person. We use it so big and small countries can be compared fairly. It's the main way the World Bank sorts countries into low, middle and high income."},
+  {k:["what is gdp","define gdp","gross domestic product","gdp mean","gdp "],a:"<b>GDP</b> (Gross Domestic Product) is the total value of new goods and services produced inside a country's borders in a year. 'Gross' means every market transaction, 'domestic' means within the borders, 'product' means new output (reselling a house doesn't count)."},
+  {k:["gni","gross national income","gdp and gni","gdp vs gni","ireland","remittance"],a:"<b>GDP vs GNI:</b> GDP is money made <em>inside</em> a country. GNI is income earned by the country's <em>people</em>: GDP + money citizens earn abroad (like remittances) − profits foreign companies take out. Ireland has GDP > GNI because foreign tech and pharma firms send profits home, so it looks richer than its people feel."},
+  {k:["ppp","purchasing power","basket","cost of living","exchange rate"],a:"<b>PPP</b> (purchasing power parity) adjusts income for the cost of living using a 'basket of goods' (food, rent, haircuts). Exchange rates ignore that a dollar buys more in a poor country. Mexico in 2012: $10,200 at exchange rates, about $15,400 PPP. Malawi: $250 vs $848. PPP matters most for poor countries."},
+  {k:["low income","middle income","high income","income group","threshold","1035","12615","world bank"],a:"World Bank groups from class: <b>low income</b> below $1,035 per person, <b>middle income</b> $1,035 to $12,615 (split at $4,085 into lower and upper middle), <b>high income</b> $12,616 and up."},
+  {k:["kennedy","worthwhile","problem with gdp","limits of gdp","failure of gdp","gdp bad","criticism"],a:"GDP counts every market transaction, good or bad. Car crashes, illness and divorce lawyers raise it; family dinners, volunteering and walks don't count at all. Robert Kennedy said it measures everything 'except that which makes life worthwhile.' It's still useful for poor countries where more output means basic needs get met."},
+  {k:["diminishing","80","100k","extra dollar","satiation"],a:"<b>Diminishing returns:</b> each extra dollar adds less wellbeing the richer you are. For a poor family $1 might mean a meal; for a rich person it means nothing. Class showed gains in life satisfaction flattening around $80,000 to $100,000. The HDI builds this in by using the logarithm of income."},
+  {k:["hdi","human development index","human development"],a:"The <b>HDI</b> (UNDP) combines three dimensions: health (life expectancy), education (mean and expected years of schooling), and standard of living (GNI per capita, PPP, using a log). It runs 0 to 1. Very High 0.800+, High 0.700 to 0.799, Medium 0.550 to 0.699, Low below 0.550."},
+  {k:["equatorial guinea","qatar","kuwait","gabon","rich but"],a:"Some countries are rich on paper but low on HDI. <b>Equatorial Guinea</b> ranked 41st on GDP per capita but 144th on HDI (Table 2.1). Oil wealth hasn't reached most people: life expectancy is about 63.7 and mean schooling 8.3 years. Qatar and Kuwait also rank lower on HDI than on income."},
+  {k:["south korea","new zealand","higher hdi"],a:"Some countries rank higher on HDI than income. <b>South Korea</b> was about 30th on GDP per capita but 15th on HDI because it invested heavily in education and health. New Zealand jumped 14 places."},
+  {k:["resource curse","paradox of plenty","curse"],a:"The <b>resource curse</b> (paradox of plenty): countries rich in oil, gas or minerals often end up with slower growth, weaker institutions and more conflict. Four mechanisms: Dutch Disease, corruption and weak institutions, conflict, and inequality. Examples: Nigeria, Venezuela, DRC. Avoided by Norway, Canada and Botswana thanks to strong, transparent institutions."},
+  {k:["dutch disease","currency"],a:"<b>Dutch Disease:</b> resource exports push up the value of the country's currency, which makes its other exports (like farming and manufacturing) more expensive and less competitive abroad."},
+  {k:["nigeria","venezuela","congo","drc"],a:"Class examples of the resource curse: <b>Nigeria</b> (oil wealth, persistent poverty, corruption, conflict in the Niger Delta), <b>Venezuela</b> (collapse after oil prices fell plus mismanagement), <b>DRC</b> (minerals fuelling conflict and weak governance)."},
+  {k:["norway","botswana","avoid"],a:"<b>Norway, Botswana and Canada</b> avoided the worst of the resource curse. The key difference was institutions: rule of law, transparency and governments that invested resource money for everyone (Norway's public wealth fund, Botswana spending diamond revenue on schools and health)."},
+  {k:["gini","gini coefficient"],a:"The <b>Gini coefficient</b> measures income inequality within a country: 0 is perfect equality, 1 (or 100) means one person has all the income. Roughly 0.25 to 0.35 is more equal (Scandinavia), 0.35 to 0.45 moderate, 0.45+ concerning. Limits: it measures income not wealth, and hides regional differences and social mobility."},
+  {k:["lorenz"],a:"A <b>Lorenz curve</b> plots the cumulative % of people (poorest to richest) against the cumulative % of income. Perfect equality is a straight diagonal line. The more the curve sags below it, the higher the Gini. The Gini is the area between the line and curve, compared with the whole triangle."},
+  {k:["quintile"],a:"The <b>quintile ratio</b> is the average income of the richest 20% divided by the average income of the poorest 20%. A ratio of 10 means the top fifth earns ten times what the bottom fifth earns."},
+  {k:["inequality","unequal","feet","fire"],a:"In this unit, <b>inequality</b> means the income gap <em>within</em> a country, not between countries. Averages hide it, like the man with feet in the fire and head on ice who says the temperature is 'on average just fine.' Measures: Gini, quintile ratio, income share of the top 1%, IHDI."},
+  {k:["top 1","richest 1","1%"],a:"Income share held by the richest 1%, from class: <b>Brazil 28.4%</b>, <b>Canada 13.6%</b>, <b>Finland 7.3%</b>."},
+  {k:["rawls","veil"],a:"John Rawls's <b>veil of ignorance</b>: design a society without knowing whether you'll be born rich or poor, healthy or sick. Since you can't rig the rules for yourself, Rawls thought you'd choose rules fair to everyone, especially the worst-off. Class also asked whether there can be <em>too little</em> inequality."},
+  {k:["ihdi","inequality-adjusted","inequality adjusted"],a:"The <b>IHDI</b> is the HDI adjusted for inequality. HDI = potential; IHDI = what people actually experience. Loss = (HDI − IHDI) ÷ HDI. From the slides: 0.939 → 0.867 is a 7.7% loss; 0.786 → 0.594 is a 24.4% loss."},
+  {k:["gender inequality","gii","women","parliament","adolescent"],a:"The <b>Gender Inequality Index</b> looks at reproductive health (adolescent birth rate, maternal mortality), empowerment (share of seats in parliament held by women, education) and the labour market (labour force participation, women vs men). Higher GII = more inequality."},
+  {k:["phdi","planetary","co2","carbon","material footprint","environment"],a:"The <b>PHDI</b> (planetary pressures-adjusted HDI) lowers a country's HDI based on carbon dioxide emissions per person and material footprint per person. Rich, high-consuming countries drop the most."},
+  {k:["birth rate","death rate","natural increase","nir","cbr","cdr","demographic"],a:"<b>Crude birth rate</b> = births per 1,000 people per year. <b>Crude death rate</b> = deaths per 1,000. <b>Natural increase rate</b> = (CBR − CDR) ÷ 10, as a percent. Example: (30 − 10) ÷ 10 = 2.0%."},
+  {k:["trend","afghanistan","ghana","graph"],a:"With <b>trends</b>, always ask WHY. A graph changes because something happened: a war, a new government, an economic boom, a disease. Example: women's labour force participation in Afghanistan dropped sharply after the Taliban returned in 2021 and restricted women's work and education."},
+  {k:["happiness","happy","measure happiness","world happiness"],a:"Happiness is usually measured with the <b>Cantril ladder</b> (0 = worst possible life, 10 = best). The <b>World Happiness Report</b> explains differences with six variables: GDP per capita, social support, healthy life expectancy, freedom to make life choices, generosity, and perceptions of corruption. Finland has ranked #1 for years."},
+  {k:["cantril","ladder"],a:"The <b>Cantril ladder</b>: imagine a ladder from 0 (worst possible life for you) to 10 (best possible). Which step are you on now? Which step will you be on in five years? It measures <em>evaluative</em> wellbeing."},
+  {k:["affective","evaluative","emotion"],a:"<b>Affective</b> wellbeing = recent emotions ('Are you happy? Did you smile yesterday?'). <b>Evaluative</b> wellbeing = judging your life as a whole ('Are you living a good life?'). Country rankings use evaluative wellbeing."},
+  {k:["aristotle","eudaimonia","flourish"],a:"<b>Aristotle</b> (384 to 322 BC) said the purpose of politics is the wellbeing of the people. His word <b>eudaimonia</b> means flourishing or living well: a whole good life, not just a good mood."},
+  {k:["costa rica"],a:"<b>Costa Rica</b> is a favourite example: GNI per capita about $23,400 (less than a third of the U.S.), yet life expectancy of 80.8 years (higher than the U.S.) and a World Happiness Report ranking in the top 10. It shows income isn't everything."},
+  {k:["happy planet"],a:"The <b>Happy Planet Index</b> combines wellbeing and life expectancy, then divides by ecological footprint. It rewards countries that achieve long, happy lives without using lots of the planet's resources. Rich, high-consuming countries usually score poorly."},
+  {k:["social capital","social support","trust","materialis","generosity"],a:"Sachs says <b>social capital</b> (support networks, trust in others and in government) is a major driver of happiness. Physical and mental health matter a lot too. People with very materialistic values report <em>less</em> life satisfaction, while generous people report more."},
+  {k:["convergence","divergence","china","niger"],a:"<b>Convergence</b> = poor countries narrowing the gap with rich ones; <b>divergence</b> = the gap widening. China went from about 2% of U.S. income per person (1980) to about 20% (2010). Niger fell from about 4% to under 2%. Roughly 1750 to 1950 was mostly divergence; since then convergence has gained the upper hand."},
+  {k:["rule of 70","double","doubling"],a:"<b>Rule of 70:</b> divide 70 by the growth rate to get the doubling time. A city growing 5% a year doubles in about 14 years (70 ÷ 5)."},
+  {k:["urban","rural","city","cities","urbaniz"],a:"From Sachs: urban areas usually have higher incomes, better services (power, water, sewers), more education and lower fertility. Rural families tend to be larger because children help on farms. All future population growth is expected to be urban; about 67% of people may live in cities by 2050."},
+  {k:["ldc","least developed","least-developed","landlocked"],a:"The <b>least-developed countries</b> are about fifty very poor UN-listed countries, concentrated in tropical Africa and Asia. Many are landlocked (Niger, Mali, Chad, Afghanistan), which makes trade harder, or small islands exposed to storms and high shipping costs."},
+  {k:["sustainable development","three pillars","sachs"],a:"Sachs defines <b>sustainable development</b> with three parts: economic development, broad-based social inclusion and environmental sustainability, all supported by good governance."},
+  {k:["global north","global south","west and the rest"],a:"The <b>Global North/Global South</b> is a rough way to group richer, industrialized countries (mostly in the north: North America, Europe, Japan, Australia) and poorer, developing countries (mostly Africa, Latin America, much of Asia). It replaced older terms like 'the West and the Rest' or 'First/Third World,' but it's a generalization and many countries don't fit neatly."},
+  {k:["study","midterm","exam","tips","prepare"],a:"Midterm tips: know each indicator's <b>definition</b>, <b>what it shows</b> and <b>what it misses</b>. Be ready to compare two countries using several indicators and explain <em>why</em> they differ. Use specific examples (Equatorial Guinea, Ireland, Costa Rica, Norway vs Nigeria, Brazil's inequality). Type 'quiz me' to practise."}
+];
+const QUIZ=[
+  ["Which indicator subtracts profits that foreign companies take out of the country?",["GDP","GNI","PPP","Gini"],1],
+  ["A Gini coefficient of 0 means:",["Total inequality","Perfect equality","No GDP","Average happiness"],1],
+  ["The HDI's three dimensions are:",["Health, education, income","GDP, GNI, PPP","Births, deaths, migration","Freedom, trust, generosity"],0],
+  ["Dutch Disease happens when:",["Resource exports raise the currency and hurt other exports","A disease spreads through farms","Foreign firms leave","Birth rates fall"],0],
+  ["Which country avoided the resource curse?",["Nigeria","Venezuela","Norway","DRC"],2],
+  ["Natural increase rate with CBR 25 and CDR 5:",["20%","2.0%","0.2%","30%"],1],
+  ["The Cantril ladder measures which type of wellbeing?",["Affective","Evaluative","Economic","Environmental"],1],
+  ["The IHDI shows:",["Potential human development","Human development after accounting for inequality","Happiness","Environmental damage"],1],
+  ["Which WHR variable is measured by recent donations to charity?",["Social support","Freedom","Generosity","Corruption"],2],
+  ["PPP adjusts income for:",["Population size","Differences in the cost of living","Inequality","Foreign profits"],1],
+  ["Low-income countries (World Bank, from class) have GDP per capita below:",["$1,035","$4,085","$12,615","$20,000"],0],
+  ["Equatorial Guinea is an example of:",["High HDI but low GDP","High GDP per capita but low HDI","Perfect equality","Convergence"],1],
+  ["Which raises GDP?",["Volunteering","Home-cooked meals","Repairs after a car crash","A walk after dinner"],2],
+  ["The PHDI adjusts HDI for:",["Gender gaps","CO₂ emissions and material footprint","Inequality","Happiness"],1],
+  ["China from 1980 to 2010 is an example of:",["Divergence","Convergence","The resource curse","Dutch Disease"],1]
+];
+const log=$("#log"); let quizIdx=null; let quizBag=[];
+function botSay(html, extra){ const m=el("div",{class:"msg bot"},html); if(extra) m.appendChild(extra); log.appendChild(m); log.scrollTop=log.scrollHeight; return m; }
+function meSay(t){ const m=el("div",{class:"msg me"}); m.textContent=t; log.appendChild(m); log.scrollTop=log.scrollHeight; }
+function askQuiz(){
+  if(!quizBag.length) quizBag=shuffle(QUIZ.map((_,i)=>i));
+  quizIdx=quizBag.pop(); const q=QUIZ[quizIdx];
+  const box=el("div",{class:"qo"});
+  q[1].forEach((o,i)=>{ const b=el("button",{type:"button"},"ABCD"[i]+". "+o); b.onclick=()=>answerQuiz(i); box.appendChild(b); });
+  botSay("<b>Quiz:</b> "+q[0], box);
+}
+function answerQuiz(i){
+  if(quizIdx==null) return; const q=QUIZ[quizIdx]; quizIdx=null;
+  $$(".msg .qo button",log).forEach(b=>b.disabled=true);
+  meSay("ABCD"[i]+". "+q[1][i]);
+  botSay(i===q[2]?"✓ Correct! Type 'quiz me' or tap below for another.":`Not quite. The answer is <b>${"ABCD"[q[2]]}. ${q[1][q[2]]}</b>. Ask me about it if you're unsure why.`);
+  setSugs(["Quiz me","Explain the HDI","What is PPP?"]);
+}
+function norm(s){ return " "+s.toLowerCase().replace(/[^a-z0-9%.\s-]/g," ").replace(/\s+/g," ")+" "; }
+function reply(text){
+  const t=norm(text);
+  if(quizIdx!=null){ const m=t.trim().match(/^([abcd])\b/); if(m){ answerQuiz("abcd".indexOf(m[1])); return; } }
+  if(/quiz|test me|question for me|practice/.test(t)){ askQuiz(); return; }
+  if(/^\s*(hi|hello|hey|yo|sup)\b/.test(t)){ botSay("Hey! Ask me about any indicator from the unit (GDP, PPP, HDI, Gini, IHDI, happiness...) or type <b>quiz me</b>."); return; }
+  if(/thank/.test(t)){ botSay("Anytime. Good luck on the midterm!"); return; }
+  let best=null, bestScore=0;
+  const words=t.trim().split(" ");
+  KB.forEach(e=>{ let s=0; e.k.forEach(k=>{
+      if(t.includes(k)) s+=k.length+(t.includes(" "+k+" ")?3:0);
+      else { const kw=k.split(" ").filter(w=>w.length>2); const got=kw.filter(w=>words.some(x=>x===w||(w.length>4&&x.startsWith(w.slice(0,5))))); if(kw.length>1 && got.length===kw.length) s+=k.length*0.8; }
+    }); if(s>bestScore){ bestScore=s; best=e; } });
+  const diff=/differ|vs|versus|compare/.test(t);
+  const bestIsCompare = best && best.k.some(k=>/ (vs|and) /.test(k) && t.includes(k));
+  if(best && diff && !bestIsCompare){
+    const hits=KB.map(e=>({e,s:e.k.reduce((a,k)=>a+(t.includes(k)?k.length:0),0)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,2);
+    if(hits.length===2 && hits[0].e!==hits[1].e){ botSay(hits[0].e.a); botSay(hits[1].e.a); return; }
+  }
+  if(best && bestScore>=3){ botSay(best.a); return; }
+  botSay("I'm a simple study bot, so I only know this unit's topics. Try asking about <b>GDP</b>, <b>GNI</b>, <b>PPP</b>, <b>HDI</b>, the <b>resource curse</b>, the <b>Gini coefficient</b>, <b>IHDI</b>, <b>happiness</b>, or <b>convergence</b>. Or type <b>quiz me</b>.");
+}
+function setSugs(arr){ const s=$("#sugs"); s.innerHTML=""; arr.forEach(a=>{ const b=el("button",{type:"button"},a); b.onclick=()=>{ meSay(a); reply(a); }; s.appendChild(b); }); }
+let greeted=false;
+$("#fab").onclick=()=>{ $("#chat").hidden=false; $("#fab").hidden=true; if(!greeted){ greeted=true; botSay("Hi! I'm Study Buddy. I can explain any indicator from this unit or quiz you. What do you want to review?"); setSugs(["Quiz me","GDP vs GNI","What is the Gini coefficient?","Resource curse","Midterm tips"]); } $("#chatIn").focus(); };
+$("#chatClose").onclick=()=>{ $("#chat").hidden=true; $("#fab").hidden=false; };
+function sendChat(){ const v=$("#chatIn").value.trim(); if(!v) return; $("#chatIn").value=""; meSay(v); reply(v); $("#chatIn").focus(); }
+$("#chatSend").addEventListener("click",sendChat);
+$("#chatIn").addEventListener("keydown",e=>{ if(e.key==="Enter" && !e.isComposing){ e.preventDefault(); sendChat(); } });
+
+/* ---------- Boot ---------- */
+updateMeter();
+show(location.hash.slice(1) || S.tab || "start");
+})();
+</script>
+</body>
+</html>
